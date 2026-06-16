@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -70,38 +70,38 @@ canvas{display:block;width:100%;height:100%;cursor:grab}canvas:active{cursor:gra
 </header>
 <div id="upload-bar">
   <label id="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-    <input type="file" accept=".csv" onchange="onFileChange(event)"/>📂 อัพโหลด CSV
+    <input type="file" accept=".csv" onchange="onFileChange(event)"/>📂 Upload CSV
   </label>
-  <span id="csv-status">NASDAQ 100 default — รองรับ CSV ที่มี column: Source, Target [, Type]</span>
-  <button id="reset-csv-btn" onclick="resetToDefault()">✕ กลับ default</button>
+  <span id="csv-status">NASDAQ 100 default — supports CSV with columns: Source, Target [, Type]</span>
+  <button id="reset-csv-btn" onclick="resetToDefault()">✕ Reset to default</button>
 </div>
 <div id="toolbar">
-  <input id="srch" placeholder="ค้นหา เช่น NVDA, AAPL" oninput="onSrch(this.value)"/>
+  <input id="srch" placeholder="Search e.g. NVDA, AAPL" oninput="onSrch(this.value)"/>
   <div class="sep"></div>
-  <button class="filter-btn on" data-f="all" onclick="setF('all')">ทั้งหมด</button>
+  <button class="filter-btn on" data-f="all" onclick="setF('all')">All</button>
   <button class="filter-btn" data-f="competitors" onclick="setF('competitors')">Competitors</button>
   <button class="filter-btn" data-f="customers" onclick="setF('customers')">Customers</button>
   <button class="filter-btn" data-f="suppliers" onclick="setF('suppliers')">Suppliers</button>
-  <!-- sentiment filters — แสดงเฉพาะตอน sentiment mode -->
+  <!-- sentiment filters — shown only in sentiment mode -->
   <div id="sentiment-filters">
     <div class="sep"></div>
-    <button class="filter-btn on" data-f="all" onclick="setSentimentFilter('all')" id="sf-all">ทั้งหมด</button>
-    <button class="filter-btn" data-f="up" onclick="setSentimentFilter('up')" id="sf-up">🟢 เขียวตาม</button>
-    <button class="filter-btn" data-f="dn" onclick="setSentimentFilter('dn')" id="sf-dn">🔴 แดงตาม</button>
+    <button class="filter-btn on" data-f="all" onclick="setSentimentFilter('all')" id="sf-all">All</button>
+    <button class="filter-btn" data-f="up" onclick="setSentimentFilter('up')" id="sf-up">🟢 Up only</button>
+    <button class="filter-btn" data-f="dn" onclick="setSentimentFilter('dn')" id="sf-dn">🔴 Down only</button>
   </div>
   <div class="sep"></div>
   <button class="reset-btn" onclick="doReset()">↺ Reset view</button>
 </div>
-<div id="infobar">คลิก node เพื่อดู relationships · ลากได้ · scroll zoom</div>
+<div id="infobar">Click a node to view relationships · drag to move · scroll to zoom</div>
 <div id="canvas-wrap">
   <canvas id="gc"></canvas>
-  <div id="mode-desc"><strong style="color:var(--text)">📊 Direct mode</strong><br>เส้นเชื่อมโดยตรงระหว่างหุ้น<br>สีเส้น = ประเภทความสัมพันธ์</div>
+  <div id="mode-desc"><strong style="color:var(--text)">📊 Direct mode</strong><br>Direct connections between stocks<br>Line color = relationship type</div>
   <div id="legend">
     <div class="leg-row"><span class="leg-line" style="background:var(--red)"></span>Competitors</div>
     <div class="leg-row"><span class="leg-line" style="background:var(--green)"></span>Customers</div>
     <div class="leg-row"><span class="leg-line" style="background:var(--gray)"></span>Suppliers</div>
     <div style="height:4px;border-top:1px solid var(--border);margin:2px 0"></div>
-    <div class="leg-row"><span class="leg-dot"></span>หุ้น (ขนาด = connections)</div>
+    <div class="leg-row"><span class="leg-dot"></span>Stock (size = connections)</div>
   </div>
   <div id="hint">🖱 scroll=zoom<br>✋ drag bg=pan<br>🖱 drag node=move<br>👆 click=highlight</div>
 </div>
@@ -180,7 +180,7 @@ function _updateSentimentUI(){
   const legend = document.getElementById('legend');
   if (on) {
     legend.innerHTML = `
-      <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.5px;margin-bottom:4px">%CHG วันนี้</div>
+      <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.5px;margin-bottom:4px">%CHG TODAY</div>
       <div class="leg-row"><span class="leg-line" style="background:#16a34a;height:10px;border-radius:3px"></span> > +3%</div>
       <div class="leg-row"><span class="leg-line" style="background:#22c55e;height:10px;border-radius:3px"></span> +1% ~ +3%</div>
       <div class="leg-row"><span class="leg-line" style="background:#4ade80;height:10px;border-radius:3px"></span> 0% ~ +1%</div>
@@ -188,14 +188,14 @@ function _updateSentimentUI(){
       <div class="leg-row"><span class="leg-line" style="background:#ef4444;height:10px;border-radius:3px"></span> -3% ~ -1%</div>
       <div class="leg-row"><span class="leg-line" style="background:#b91c1c;height:10px;border-radius:3px"></span> < -3%</div>
       <div style="height:4px;border-top:1px solid var(--border);margin:4px 0"></div>
-      <div class="leg-row"><span class="leg-dot" style="background:#3a3a4a;border:1px solid #555"></span> ไม่มีข้อมูล</div>`;
+      <div class="leg-row"><span class="leg-dot" style="background:#3a3a4a;border:1px solid #555"></span> No data</div>`;
   } else {
     legend.innerHTML = `
       <div class="leg-row"><span class="leg-line" style="background:var(--red)"></span>Competitors</div>
       <div class="leg-row"><span class="leg-line" style="background:var(--green)"></span>Customers</div>
       <div class="leg-row"><span class="leg-line" style="background:var(--gray)"></span>Suppliers</div>
       <div style="height:4px;border-top:1px solid var(--border);margin:2px 0"></div>
-      <div class="leg-row"><span class="leg-dot"></span>หุ้น (ขนาด = connections)</div>`;
+      <div class="leg-row"><span class="leg-dot"></span>Stock (size = connections)</div>`;
   }
 
   // อัปเดต mode-desc
@@ -205,20 +205,20 @@ function _updateSentimentUI(){
     const up   = Object.values(PRICE_DATA).filter(d => d.pct > 0).length;
     const dn   = Object.values(PRICE_DATA).filter(d => d.pct < 0).length;
     desc.innerHTML = `<strong style="color:#e2e0d8">🎨 Sentiment mode</strong><br>
-      สี node = %Chg วันนี้<br>
-      <span style="color:#22c55e">▲ ${up} หุ้นขึ้น</span> · <span style="color:#ef4444">▼ ${dn} หุ้นลง</span><br>
-      <span style="color:var(--muted);font-size:10px">ข้อมูล ${total} หุ้น · คลิก node ดูรายละเอียด</span>`;
+      Node color = %Chg today<br>
+      <span style="color:#22c55e">▲ ${up} up</span> · <span style="color:#ef4444">▼ ${dn} down</span><br>
+      <span style="color:var(--muted);font-size:10px">${total} stocks · click a node for details</span>`;
   } else {
     desc.innerHTML = mode === 'direct'
-      ? '<strong style="color:#e2e0d8">📊 Direct mode</strong><br>เส้นเชื่อมโดยตรงระหว่างหุ้น<br>สีเส้น = ประเภทความสัมพันธ์'
-      : '<strong style="color:#e2e0d8">🔵 Cluster mode</strong><br>node กลางคือกลุ่ม เช่น NVDA_CUSTOMERS<br>สี node = ประเภทกลุ่ม';
+      ? '<strong style="color:#e2e0d8">📊 Direct mode</strong><br>Direct connections between stocks<br>Line color = relationship type'
+      : '<strong style="color:#e2e0d8">🔵 Cluster mode</strong><br>Center node is a group, e.g. NVDA_CUSTOMERS<br>Node color = group type';
   }
   draw();
 }
 function buildDirect(){nodes=STOCKS.map(n=>({...n,x:(Math.random()-.5)*500,y:(Math.random()-.5)*500}));const nm=new Map(nodes.map(n=>[n.id,n]));links=LINKS.map(l=>({source:nm.get(l.s),target:nm.get(l.t),type:l.y})).filter(l=>l.source&&l.target);}
 function buildCluster(){nodes=CNODES.map(n=>({...n,x:(Math.random()-.5)*600,y:(Math.random()-.5)*600}));const nm=new Map(nodes.map(n=>[n.id,n]));links=CLINKS.map(l=>({source:nm.get(l.source),target:nm.get(l.target),type:null})).filter(l=>l.source&&l.target);}
 function startSim(){if(sim)sim.stop();const dist=mode==='direct'?85:60,str=mode==='direct'?.35:.5,chg=mode==='direct'?-200:-160;sim=d3.forceSimulation(nodes).force('link',d3.forceLink(links).distance(dist).strength(str)).force('charge',d3.forceManyBody().strength(chg)).force('center',d3.forceCenter(0,0)).force('col',d3.forceCollide(d=>getR(d)+3)).on('tick',draw);}
-function initMode(){sel=null;srch='';document.getElementById('srch').value='';const r=canvas.getBoundingClientRect();tr={x:r.width/2,y:r.height/2,k:mode==='direct'?.88:.75};if(mode==='direct')buildDirect();else buildCluster();startSim();const desc=document.getElementById('mode-desc');desc.innerHTML=mode==='direct'?'<strong style="color:#e2e0d8">📊 Direct mode</strong><br>เส้นเชื่อมโดยตรงระหว่างหุ้น<br>สีเส้น = ประเภทความสัมพันธ์':'<strong style="color:#e2e0d8">🔵 Cluster mode</strong><br>node กลางคือกลุ่ม เช่น NVDA_CUSTOMERS<br>สี node = ประเภทกลุ่ม';setInfoDefault();draw();}
+function initMode(){sel=null;srch='';document.getElementById('srch').value='';const r=canvas.getBoundingClientRect();tr={x:r.width/2,y:r.height/2,k:mode==='direct'?.88:.75};if(mode==='direct')buildDirect();else buildCluster();startSim();const desc=document.getElementById('mode-desc');desc.innerHTML=mode==='direct'?'<strong style="color:#e2e0d8">📊 Direct mode</strong><br>Direct connections between stocks<br>Line color = relationship type':'<strong style="color:#e2e0d8">🔵 Cluster mode</strong><br>Center node is a group, e.g. NVDA_CUSTOMERS<br>Node color = group type';setInfoDefault();draw();}
 function resize(){const r=canvas.getBoundingClientRect();canvas.width=r.width*devicePixelRatio;canvas.height=r.height*devicePixelRatio;canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.scale(devicePixelRatio,devicePixelRatio);}
 window.addEventListener('resize',()=>{resize();sim&&sim.alpha(.3).restart();});
 function getR(d){if(mode==='cluster'){if(d.type==='stock')return Math.max(7,Math.min(18,5+(d.conn||1)*.5));return Math.max(5,Math.min(11,4+(d.conn||1)*.4));}return Math.max(7,Math.min(20,6+(d.c||d.conn||1)*.35));}
@@ -340,7 +340,7 @@ function updInfo(){
   if(comp.length)bar.innerHTML+=comp.map(x=>fmt(x,'competitors')).join('');
   if(cust.length)bar.innerHTML+=cust.map(x=>fmt(x,'customers')).join('');
   if(supp.length)bar.innerHTML+=supp.map(x=>fmt(x,'suppliers')).join('');
-  if(!comp.length&&!cust.length&&!supp.length)bar.innerHTML+=`<span style="color:var(--muted)">ไม่มี connection</span>`;
+  if(!comp.length&&!cust.length&&!supp.length)bar.innerHTML+=`<span style="color:var(--muted)">No connection</span>`;
 }
 
 function getNode(sx,sy){const w=s2w(sx,sy);for(const d of nodes)if((d.x-w.x)**2+(d.y-w.y)**2<(getR(d)+5)**2)return d;return null;}
@@ -351,20 +351,20 @@ canvas.addEventListener('wheel',e=>{e.preventDefault();const r=canvas.getBoundin
 function setInfoDefault(){
   const bar = document.getElementById('infobar');
   if(sentimentMode && sentimentFilter !== 'all') {
-    bar.innerHTML = `<span style="color:#7a7f96">👆 คลิกหุ้นที่สนใจเพื่อดูว่าหุ้นที่เชื่อมกัน</span>
-      <span style="color:${sentimentFilter==='up'?'#4ade80':'#f87171'}">${sentimentFilter==='up'?'🟢 เขียวตาม':'🔴 แดงตาม'}</span>
-      <span style="color:#7a7f96">บ้าง</span>`;
+    bar.innerHTML = `<span style="color:#7a7f96">👆 Click a stock of interest to see which connected stocks</span>
+      <span style="color:${sentimentFilter==='up'?'#4ade80':'#f87171'}">${sentimentFilter==='up'?'🟢 move up':'🔴 move down'}</span>
+      <span style="color:#7a7f96">with it</span>`;
   } else {
-    bar.textContent = 'คลิก node เพื่อดู relationships · ลากได้ · scroll zoom';
+    bar.textContent = 'Click a node to view relationships · drag to move · scroll to zoom';
   }
 }
-function updInfo(){if(!sel){setInfoDefault();return;}const vl=vlinks(),comp=[],cust=[],supp=[],other=[];vl.forEach(l=>{const si=l.source.id,ti=l.target.id;if(si===sel||ti===sel){const o=si===sel?ti:si;if(l.type==='competitors')comp.push(o);else if(l.type==='customers')cust.push(o);else if(l.type==='suppliers')supp.push(o);else other.push(o);}});const bar=document.getElementById('infobar');bar.innerHTML=`<strong style="color:#e2e0d8">${sel}</strong> `;if(comp.length)bar.innerHTML+=comp.map(x=>`<span class="tag tag-comp">${x}</span>`).join('');if(cust.length)bar.innerHTML+=cust.map(x=>`<span class="tag tag-cust">${x}</span>`).join('');if(supp.length)bar.innerHTML+=supp.map(x=>`<span class="tag tag-supp">${x}</span>`).join('');if(!comp.length&&!cust.length&&!supp.length&&!other.length)bar.innerHTML+=`<span style="color:var(--muted)">ไม่มี connection</span>`;}
+function updInfo(){if(!sel){setInfoDefault();return;}const vl=vlinks(),comp=[],cust=[],supp=[],other=[];vl.forEach(l=>{const si=l.source.id,ti=l.target.id;if(si===sel||ti===sel){const o=si===sel?ti:si;if(l.type==='competitors')comp.push(o);else if(l.type==='customers')cust.push(o);else if(l.type==='suppliers')supp.push(o);else other.push(o);}});const bar=document.getElementById('infobar');bar.innerHTML=`<strong style="color:#e2e0d8">${sel}</strong> `;if(comp.length)bar.innerHTML+=comp.map(x=>`<span class="tag tag-comp">${x}</span>`).join('');if(cust.length)bar.innerHTML+=cust.map(x=>`<span class="tag tag-cust">${x}</span>`).join('');if(supp.length)bar.innerHTML+=supp.map(x=>`<span class="tag tag-supp">${x}</span>`).join('');if(!comp.length&&!cust.length&&!supp.length&&!other.length)bar.innerHTML+=`<span style="color:var(--muted)">No connection</span>`;}
 function setMode(m,btn){mode=m;sel=null;document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('toolbar').style.display=m==='direct'?'flex':'none';initMode();}
 function setF(f){ftype=f;sel=null;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));document.querySelector(`.filter-btn[data-f="${f}"]`).classList.add('on');setInfoDefault();draw();}
 function onSrch(v){srch=v;sel=null;setInfoDefault();draw();}
 function doReset(){const r=canvas.getBoundingClientRect();tr={x:r.width/2,y:r.height/2,k:mode==='direct'?.88:.75};sel=null;setInfoDefault();draw();}
-function parseCSV(text){const lines=text.trim().split(/\r?\n/).filter(l=>l.trim());if(lines.length<2)throw new Error('CSV ต้องมีอย่างน้อย 2 แถว');const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));const srcIdx=headers.findIndex(h=>h==='source'),tgtIdx=headers.findIndex(h=>h==='target');if(srcIdx===-1||tgtIdx===-1)throw new Error('ไม่พบ column "Source" และ "Target"');const typeIdx=headers.findIndex(h=>['type','relationship','rel','kind'].includes(h));const rawLinks=[],connCount={};for(let i=1;i<lines.length;i++){const cols=lines[i].split(',').map(c=>c.trim().replace(/"/g,''));const src=cols[srcIdx],tgt=cols[tgtIdx];if(!src||!tgt||src===tgt)continue;const type=typeIdx!==-1?cols[typeIdx]?.toLowerCase():null;rawLinks.push({s:src,t:tgt,y:type||null});connCount[src]=(connCount[src]||0)+1;connCount[tgt]=(connCount[tgt]||0)+1;}if(!rawLinks.length)throw new Error('ไม่พบ edge ใน CSV');const allIds=new Set(rawLinks.flatMap(l=>[l.s,l.t]));const newNodes=[...allIds].map(id=>({id,c:connCount[id]||1,conn:connCount[id]||1,type:id.includes('_')?id.split('_').slice(1).join('_').toLowerCase():'stock'}));return{nodes:newNodes,links:rawLinks,count:{nodes:newNodes.length,links:rawLinks.length}};}
-function applyCustomData(parsed,filename){STOCKS.length=0;parsed.nodes.forEach(n=>STOCKS.push(n));LINKS.length=0;parsed.links.forEach(l=>LINKS.push(l));document.getElementById('subtitle').textContent=`${parsed.count.nodes} nodes · ${parsed.count.links} edges · ${filename}`;const st=document.getElementById('csv-status');st.textContent=`✓ โหลด ${filename} สำเร็จ`;st.className='ok';document.getElementById('reset-csv-btn').style.display='inline-block';sel=null;ftype='all';document.getElementById('srch').value='';srch='';initMode();}
+function parseCSV(text){const lines=text.trim().split(/\r?\n/).filter(l=>l.trim());if(lines.length<2)throw new Error('CSV must have at least 2 rows');const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));const srcIdx=headers.findIndex(h=>h==='source'),tgtIdx=headers.findIndex(h=>h==='target');if(srcIdx===-1||tgtIdx===-1)throw new Error('Missing "Source" and "Target" columns');const typeIdx=headers.findIndex(h=>['type','relationship','rel','kind'].includes(h));const rawLinks=[],connCount={};for(let i=1;i<lines.length;i++){const cols=lines[i].split(',').map(c=>c.trim().replace(/"/g,''));const src=cols[srcIdx],tgt=cols[tgtIdx];if(!src||!tgt||src===tgt)continue;const type=typeIdx!==-1?cols[typeIdx]?.toLowerCase():null;rawLinks.push({s:src,t:tgt,y:type||null});connCount[src]=(connCount[src]||0)+1;connCount[tgt]=(connCount[tgt]||0)+1;}if(!rawLinks.length)throw new Error('No edges found in CSV');const allIds=new Set(rawLinks.flatMap(l=>[l.s,l.t]));const newNodes=[...allIds].map(id=>({id,c:connCount[id]||1,conn:connCount[id]||1,type:id.includes('_')?id.split('_').slice(1).join('_').toLowerCase():'stock'}));return{nodes:newNodes,links:rawLinks,count:{nodes:newNodes.length,links:rawLinks.length}};}
+function applyCustomData(parsed,filename){STOCKS.length=0;parsed.nodes.forEach(n=>STOCKS.push(n));LINKS.length=0;parsed.links.forEach(l=>LINKS.push(l));document.getElementById('subtitle').textContent=`${parsed.count.nodes} nodes · ${parsed.count.links} edges · ${filename}`;const st=document.getElementById('csv-status');st.textContent=`✓ Loaded ${filename} successfully`;st.className='ok';document.getElementById('reset-csv-btn').style.display='inline-block';sel=null;ftype='all';document.getElementById('srch').value='';srch='';initMode();}
 function resetToDefault(){document.getElementById('subtitle').textContent='62 stocks · 353 relationships';const st=document.getElementById('csv-status');st.textContent='NASDAQ 100 default';st.className='';document.getElementById('reset-csv-btn').style.display='none';sel=null;ftype='all';document.getElementById('srch').value='';srch='';initMode();}
 function loadFile(file){if(!file||!file.name.endsWith('.csv'))return;const reader=new FileReader();reader.onload=e=>{try{applyCustomData(parseCSV(e.target.result),file.name);}catch(err){const st=document.getElementById('csv-status');st.textContent='✕ '+err.message;st.className='err';}};reader.readAsText(file);}
 function onFileChange(e){loadFile(e.target.files[0]);e.target.value='';}

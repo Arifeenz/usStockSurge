@@ -525,9 +525,9 @@ td:first-child{text-align:left}
   <!-- Market strip -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
     <div style="display:flex;gap:6px;align-items:center">
-      <span style="font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase">แสดง</span>
+      <span style="font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase">Show</span>
       <div style="display:flex;gap:4px" id="stripModeBar">
-        <button class="strip-mode-btn active" data-mode="index"    onclick="setStripMode('index')">📈 ดัชนีตลาด</button>
+        <button class="strip-mode-btn active" data-mode="index"    onclick="setStripMode('index')">📈 Market Index</button>
         <button class="strip-mode-btn"        data-mode="top"      onclick="setStripMode('top')">🔥 Top Picks</button>
         <button class="strip-mode-btn"        data-mode="volume"   onclick="setStripMode('volume')">🔊 Volume Surge</button>
         <button class="strip-mode-btn"        data-mode="oversold" onclick="setStripMode('oversold')">📉 RSI Oversold</button>
@@ -561,7 +561,7 @@ td:first-child{text-align:left}
     <div class="sm">
       <!-- Symbol search -->
       <div style="position:relative">
-        <input id="symSearch" type="text" placeholder="🔍 ค้นหา symbol…"
+        <input id="symSearch" type="text" placeholder="🔍 Search symbol…"
           style="font-family:var(--mono);font-size:12px;padding:4px 10px 4px 10px;
             border-radius:6px;border:1px solid var(--border);background:var(--surface);
             color:var(--ink-1);outline:none;width:160px;transition:all .15s"
@@ -779,7 +779,7 @@ td:first-child{text-align:left}
       <div style="display:flex;gap:10px;align-items:center">
         <div style="position:relative;flex:1">
           <input id="relInput" type="text"
-            placeholder="พิมพ์ชื่อหุ้น เช่น NVDA, AAPL, MSFT…"
+            placeholder="Type a symbol e.g. NVDA, AAPL, MSFT…"
             style="width:100%;padding:12px 16px;border-radius:10px;border:1.5px solid var(--border);
               background:var(--surface);font-family:var(--mono);font-size:14px;color:var(--ink-1);
               outline:none;transition:border-color .15s"
@@ -800,7 +800,7 @@ td:first-child{text-align:left}
             white-space:nowrap;transition:background .15s"
           onmouseover="this.style.background='#1748c4'"
           onmouseout="this.style.background='var(--accent)'">
-          ค้นหา
+          Search
         </button>
       </div>
       <!-- quick picks -->
@@ -811,8 +811,8 @@ td:first-child{text-align:left}
     <div id="relResult">
       <div style="text-align:center;padding:60px 0;color:var(--ink-3)">
         <div style="font-size:36px;margin-bottom:12px">🔍</div>
-        <div style="font-size:14px;font-weight:600;color:var(--ink-2)">ค้นหาหุ้นเพื่อดู Relations</div>
-        <div style="font-size:12px;margin-top:6px">มีข้อมูล 36 หุ้น จาก Nasdaq 100</div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink-2)">Search a stock to view Relations</div>
+        <div style="font-size:12px;margin-top:6px">36 stocks available from Nasdaq 100</div>
       </div>
     </div>
 
@@ -833,7 +833,7 @@ td:first-child{text-align:left}
       <!-- Add symbol -->
       <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
         <div style="position:relative">
-          <input id="wlAddInput" type="text" placeholder="เพิ่มหุ้น เช่น NVDA"
+          <input id="wlAddInput" type="text" placeholder="Add a stock e.g. NVDA"
             style="font-family:var(--mono);font-size:13px;padding:7px 12px;
               border-radius:8px;border:1.5px solid var(--border);background:var(--surface);
               color:var(--ink-1);outline:none;width:170px;transition:all .15s"
@@ -850,7 +850,7 @@ td:first-child{text-align:left}
         <button onclick="wlAdd(document.getElementById('wlAddInput').value)"
           style="padding:7px 16px;border-radius:8px;border:none;background:var(--accent);
             color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer">
-          + เพิ่ม
+          + Add
         </button>
       </div>
     </div>
@@ -859,8 +859,8 @@ td:first-child{text-align:left}
     <div id="wlContent">
       <div style="text-align:center;padding:60px 0;color:var(--ink-3)">
         <div style="font-size:36px;margin-bottom:12px">⭐</div>
-        <div style="font-size:14px;font-weight:600;color:var(--ink-2)">ยังไม่มีหุ้นใน Watchlist</div>
-        <div style="font-size:12px;margin-top:6px">กด ⭐ ที่ Screener หรือพิมพ์ชื่อหุ้นด้านบน</div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink-2)">No stocks in Watchlist yet</div>
+        <div style="font-size:12px;margin-top:6px">Click ⭐ on Screener or type a symbol above</div>
       </div>
     </div>
 
@@ -1048,7 +1048,7 @@ function renderScreener() {
           id="wlBtn-${s.symbol}"
           style="background:none;border:none;cursor:pointer;font-size:16px;
             opacity:${WL_SET.has(s.symbol)?'1':'0.25'};transition:opacity .15s"
-          title="${WL_SET.has(s.symbol)?'ลบออก Watchlist':'เพิ่มใน Watchlist'}">⭐</button>
+          title="${WL_SET.has(s.symbol)?'Remove from Watchlist':'Add to Watchlist'}">⭐</button>
       </td>`;
     tbody.appendChild(tr);
   });
@@ -2229,7 +2229,7 @@ function renderMsCard(idx, d, label, sublabel) {
     document.getElementById(`ms-card-${idx}`).innerHTML = `
       <div class="mc-top"><span class="mc-sym">#${idx+1}</span><span class="mc-type">${sublabel||''}</span></div>
       <div class="mc-val" style="font-size:14px;color:var(--ink-3)">—</div>
-      <div class="mc-chg" style="color:var(--ink-3)">ไม่มีข้อมูล</div>
+      <div class="mc-chg" style="color:var(--ink-3)">No data</div>
       <div class="mc-bar"><div class="mc-fill" style="width:0%"></div></div>`;
     msSymbols[idx] = '';
     return;
@@ -2406,7 +2406,7 @@ function relSearch(sym) {
   const result = document.getElementById('relResult');
 
   if (!REL_LOADED) {
-    result.innerHTML = `<div style="text-align:center;padding:40px;color:var(--ink-3)">กำลังโหลด…</div>`;
+    result.innerHTML = `<div style="text-align:center;padding:40px;color:var(--ink-3)">Loading…</div>`;
     loadRelations().then(() => relSearch(sym));
     return;
   }
@@ -2415,8 +2415,8 @@ function relSearch(sym) {
   if (!data) {
     result.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--ink-3)">
       <div style="font-size:36px;margin-bottom:12px">🔍</div>
-      <div style="font-size:14px;font-weight:600;color:var(--ink-2)">ไม่พบข้อมูลสำหรับ "${sym}"</div>
-      <div style="font-size:12px;margin-top:6px">มีข้อมูลสำหรับ: ${Object.keys(REL_DATA).sort().join(', ')}</div>
+      <div style="font-size:14px;font-weight:600;color:var(--ink-2)">No data found for "${sym}"</div>
+      <div style="font-size:12px;margin-top:6px">Available data: ${Object.keys(REL_DATA).sort().join(', ')}</div>
     </div>`;
     return;
   }
@@ -2495,13 +2495,13 @@ function relSearch(sym) {
         <!-- Legend -->
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:5px">
-            <div style="width:12px;height:12px;border-radius:3px;background:#0f2d1a;border:2px solid #22c55e"></div>ราคาขึ้น
+            <div style="width:12px;height:12px;border-radius:3px;background:#0f2d1a;border:2px solid #22c55e"></div>Price up
           </div>
           <div style="display:flex;align-items:center;gap:5px">
-            <div style="width:12px;height:12px;border-radius:3px;background:#2d0f0f;border:2px solid #ef4444"></div>ราคาลง
+            <div style="width:12px;height:12px;border-radius:3px;background:#2d0f0f;border:2px solid #ef4444"></div>Price down
           </div>
           <div style="display:flex;align-items:center;gap:5px">
-            <div style="width:12px;height:12px;border-radius:3px;background:#2a2a2a;border:2px solid #555"></div>ไม่มีข้อมูล
+            <div style="width:12px;height:12px;border-radius:3px;background:#2a2a2a;border:2px solid #555"></div>No data
           </div>
         </div>
 
@@ -2527,7 +2527,7 @@ function relSearch(sym) {
               🗺 Zone
             </button>
           </div>
-          <span style="color:#666;font-size:10px">🖱 คลิก=รายละเอียด · ดับเบิลคลิก=ดู Relations</span>
+          <span style="color:#666;font-size:10px">🖱 Click=details · Double-click=view Relations</span>
           <button id="relFitBtn" onclick="if(window._relNetwork) window._relNetwork.fit({animation:{duration:400,easingFunction:'easeInOutQuad'}})"
             style="padding:4px 12px;border-radius:6px;border:1px solid #555;background:#2a2a2a;
               color:#fff;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;
@@ -2752,10 +2752,10 @@ function drawRelGraph(sym, suppliers, customers, competitors) {
 
     // zone labels
     const zoneLabels = [
-      { id:'Z_SUP_UP',   label:'🔧↑ Sup ขึ้น',   x:-400, y:-200, col:'#1a6e3a' },
-      { id:'Z_SUP_DN',   label:'🔧↓ Sup ลง',    x:-400, y: 200, col:'#6e1a1a' },
-      { id:'Z_CUS_UP',   label:'🛒↑ Cust ขึ้น',  x: 400, y:-200, col:'#1a6e3a' },
-      { id:'Z_CUS_DN',   label:'🛒↓ Cust ลง',   x: 400, y: 200, col:'#6e1a1a' },
+      { id:'Z_SUP_UP',   label:'🔧↑ Sup Up',    x:-400, y:-200, col:'#1a6e3a' },
+      { id:'Z_SUP_DN',   label:'🔧↓ Sup Down',  x:-400, y: 200, col:'#6e1a1a' },
+      { id:'Z_CUS_UP',   label:'🛒↑ Cust Up',   x: 400, y:-200, col:'#1a6e3a' },
+      { id:'Z_CUS_DN',   label:'🛒↓ Cust Down', x: 400, y: 200, col:'#6e1a1a' },
       { id:'Z_COM',      label:'⚔️ Competitors', x:   0, y: 320, col:'#e67e22' },
     ];
     zoneLabels.forEach(z => {
@@ -2862,7 +2862,7 @@ function drawRelGraph(sym, suppliers, customers, competitors) {
       ? `<span style="color:${up?'#16a34a':'#dc2626'};font-size:13px;font-weight:600">
           ${up?'▲':'▼'} ${up?'+':''}${Number(pct).toFixed(2)}%
         </span>`
-      : `<span style="color:#666;font-size:12px">ไม่มีข้อมูล %Chg</span>`;
+      : `<span style="color:#666;font-size:12px">No %Chg data</span>`;
 
     const priceHtml = price
       ? `<div style="font-family:'DM Mono',monospace;font-size:18px;font-weight:600;
@@ -2882,9 +2882,9 @@ function drawRelGraph(sym, suppliers, customers, competitors) {
           width:100%;margin-top:10px;padding:8px;border-radius:8px;border:none;
           background:var(--accent);color:#fff;font-size:12px;font-weight:700;
           cursor:pointer;font-family:var(--sans)">
-          🔗 ดู Relations ของ ${cleanSym}
+          🔗 View Relations for ${cleanSym}
         </button>`
-      : `<div style="margin-top:8px;font-size:11px;color:#666;text-align:center">ไม่มีข้อมูล Relations</div>`;
+      : `<div style="margin-top:8px;font-size:11px;color:#666;text-align:center">No Relations data</div>`;
 
     popupEl.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -2975,7 +2975,7 @@ function wlAddSym(sym, note='', alertScore=75) {
   if (!sym || WL_SET.has(sym)) return;
   // ตรวจว่ามีใน universe
   const exists = ALL_DATA.find(d => d.symbol === sym);
-  if (!exists) { showToast(`❌ ไม่พบ ${sym} ใน universe`); return; }
+  if (!exists) { showToast(`❌ ${sym} not found in universe`); return; }
   WATCHLIST.push({
     symbol: sym,
     added_date: new Date().toISOString().split('T')[0],
@@ -2986,7 +2986,7 @@ function wlAddSym(sym, note='', alertScore=75) {
   wlSave();
   updateWlBtn(sym);
   renderWatchlist();
-  showToast(`⭐ เพิ่ม ${sym} เข้า Watchlist แล้ว`);
+  showToast(`⭐ Added ${sym} to Watchlist`);
 }
 
 function wlRemove(sym) {
@@ -2995,7 +2995,7 @@ function wlRemove(sym) {
   wlSave();
   updateWlBtn(sym);
   renderWatchlist();
-  showToast(`🗑 ลบ ${sym} ออกจาก Watchlist`);
+  showToast(`🗑 Removed ${sym} from Watchlist`);
 }
 
 function updateWlBtn(sym) {
@@ -3003,7 +3003,7 @@ function updateWlBtn(sym) {
   if (!btn) return;
   const inWl = WL_SET.has(sym);
   btn.style.opacity = inWl ? '1' : '0.25';
-  btn.title = inWl ? 'ลบออก Watchlist' : 'เพิ่มใน Watchlist';
+  btn.title = inWl ? 'Remove from Watchlist' : 'Add to Watchlist';
 }
 
 function wlAdd(val) {
@@ -3043,8 +3043,8 @@ function renderWatchlist() {
   if (!WATCHLIST.length) {
     el.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--ink-3)">
       <div style="font-size:36px;margin-bottom:12px">⭐</div>
-      <div style="font-size:14px;font-weight:600;color:var(--ink-2)">ยังไม่มีหุ้นใน Watchlist</div>
-      <div style="font-size:12px;margin-top:6px">กด ⭐ ที่ Screener หรือพิมพ์ชื่อหุ้นด้านบน</div>
+      <div style="font-size:14px;font-weight:600;color:var(--ink-2)">No stocks in Watchlist yet</div>
+      <div style="font-size:12px;margin-top:6px">Click ⭐ on Screener or type a symbol above</div>
     </div>`;
     document.getElementById('wlSummary').textContent = '—';
     return;
@@ -3100,16 +3100,16 @@ function renderWatchlist() {
             font-size:14px;transition:color .15s"
           onmouseover="this.style.color='var(--red)'"
           onmouseout="this.style.color='var(--ink-3)'"
-          title="ลบออก">🗑</button>
+          title="Remove">🗑</button>
       </td>
     </tr>`;
   }).join('');
 
   const avgBounce = WATCHLIST.length ? (totalBounce/WATCHLIST.length).toFixed(1) : '—';
   document.getElementById('wlSummary').innerHTML =
-    `${WATCHLIST.length} หุ้น &nbsp;·&nbsp;
-    <span style="color:var(--green)">▲ ${upCount} เขียว</span> &nbsp;
-    <span style="color:var(--red)">▼ ${dnCount} แดง</span> &nbsp;·&nbsp;
+    `${WATCHLIST.length} stocks &nbsp;·&nbsp;
+    <span style="color:var(--green)">▲ ${upCount} up</span> &nbsp;
+    <span style="color:var(--red)">▼ ${dnCount} down</span> &nbsp;·&nbsp;
     Avg Bounce <strong>${avgBounce}</strong>`;
 
   el.innerHTML = `
@@ -3129,7 +3129,7 @@ function renderWatchlist() {
       <button onclick="wlClearAll()"
         style="font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--border);
           background:var(--surface);color:var(--red);cursor:pointer;font-family:var(--sans)">
-        🗑 ล้างทั้งหมด
+        🗑 Clear all
       </button>
       <button onclick="wlExport()"
         style="font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--border);
@@ -3158,16 +3158,16 @@ function wlCheckAlerts() {
   // แสดง toast พิเศษ — คลิกไปที่ watchlist ได้
   const t = document.getElementById('toast');
   document.getElementById('toastMsg').innerHTML =
-    `<span style="cursor:pointer" onclick="navTo('watchlist')">${hits.length} หุ้นใน Watchlist น่าสนใจ: ${names} — คลิกดู</span>`;
+    `<span style="cursor:pointer" onclick="navTo('watchlist')">${hits.length} Watchlist stocks of interest: ${names} — click to view</span>`;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 8000); // แสดงนานขึ้น 8s
+  setTimeout(() => t.classList.remove('show'), 8000); // show longer 8s
 }
 
 function wlClearAll() {
-  if (!confirm(`ล้าง watchlist ทั้งหมด ${WATCHLIST.length} หุ้น?`)) return;
+  if (!confirm(`Clear all ${WATCHLIST.length} stocks from watchlist?`)) return;
   WATCHLIST = []; WL_SET.clear(); wlSave();
   renderWatchlist(); renderScreener();
-  showToast('🗑 ล้าง Watchlist แล้ว');
+  showToast('🗑 Watchlist cleared');
 }
 
 function wlExport() {
@@ -3175,7 +3175,7 @@ function wlExport() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'watchlist.json'; a.click();
-  showToast('💾 Export watchlist.json แล้ว');
+  showToast('💾 Exported watchlist.json');
 }
 
 // Load data sources
