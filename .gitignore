@@ -1,0 +1,12 @@
+# backup files (auto-generated)
+filter_universe_backup_*.json
+
+# old/test files
+*_old.csv
+*_old.json
+*_old.html
+*_old.py
+*_khet.py
+
+# watchlist now uses localStorage, not file
+watchlist.json

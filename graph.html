@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NASDAQ 100 — Stock Relationship Graph</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0f14;--bg2:#141720;--border:#2a2f42;--text:#e2e0d8;--muted:#7a7f96;--purple:#7c6fd4;--red:#E05030;--green:#1D9E75;--gray:#6b7280}
+body{background:var(--bg);color:var(--text);font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-size:15px;font-weight:600;color:var(--text)}.logo span{color:var(--purple)}
+.subtitle{font-size:12px;color:var(--muted)}
+.mode-tabs{display:flex;gap:4px;margin-left:auto}
+.mode-tab{padding:6px 16px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .18s}
+.mode-tab.active{background:var(--purple);border-color:var(--purple);color:#fff}
+#toolbar{padding:10px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#srch{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-size:12px;padding:5px 10px;border-radius:8px;width:140px;outline:none}
+#srch:focus{border-color:var(--purple)}#srch::placeholder{color:var(--muted)}
+.filter-btn{padding:4px 12px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s}
+.filter-btn:hover{border-color:var(--purple);color:var(--text)}
+.filter-btn.on{color:#fff}
+.filter-btn.on[data-f="all"]{background:var(--purple);border-color:var(--purple)}
+.filter-btn.on[data-f="competitors"]{background:var(--red);border-color:var(--red)}
+.filter-btn.on[data-f="customers"]{background:var(--green);border-color:var(--green)}
+.filter-btn.on[data-f="suppliers"]{background:var(--gray);border-color:var(--gray)}
+.filter-btn.on[data-f="up"]{background:#16a34a;border-color:#16a34a}
+.filter-btn.on[data-f="dn"]{background:#dc2626;border-color:#dc2626}
+#sentiment-filters{display:none;align-items:center;gap:6px}
+.sep{width:1px;height:16px;background:var(--border);margin:0 4px}
+.reset-btn{padding:4px 12px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s}
+.reset-btn:hover{border-color:var(--text);color:var(--text)}
+#infobar{padding:7px 24px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);min-height:32px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:500;margin:1px}
+.tag-comp{background:rgba(224,80,48,.18);color:#f47a5a;border:1px solid rgba(224,80,48,.3)}
+.tag-cust{background:rgba(29,158,117,.18);color:#4dc9a0;border:1px solid rgba(29,158,117,.3)}
+.tag-supp{background:rgba(107,114,128,.18);color:#9ca3af;border:1px solid rgba(107,114,128,.3)}
+#canvas-wrap{flex:1;position:relative;overflow:hidden}
+canvas{display:block;width:100%;height:100%;cursor:grab}canvas:active{cursor:grabbing}
+#legend{position:absolute;bottom:16px;left:20px;background:rgba(13,15,20,.85);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:5px;backdrop-filter:blur(6px)}
+.leg-row{display:flex;align-items:center;gap:8px}
+.leg-line{width:22px;height:2px;border-radius:2px}
+.leg-dot{width:10px;height:10px;border-radius:50%;background:var(--purple)}
+#hint{position:absolute;bottom:16px;right:20px;background:rgba(13,15,20,.75);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:10px;color:var(--muted);line-height:1.8;backdrop-filter:blur(6px)}
+#mode-desc{position:absolute;top:12px;right:16px;background:rgba(13,15,20,.8);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--muted);max-width:220px;line-height:1.5;backdrop-filter:blur(6px)}
+#upload-bar{padding:8px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg2)}
+#drop-zone{border:1.5px dashed var(--border);border-radius:8px;padding:6px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+#drop-zone:hover,#drop-zone.drag-over{border-color:var(--purple);color:var(--text);background:rgba(124,111,212,.08)}
+#drop-zone input{display:none}
+#csv-status{font-size:11px;color:var(--muted);flex:1}
+#csv-status.ok{color:#4dc9a0}#csv-status.err{color:#f47a5a}
+#reset-csv-btn{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;display:none}
+#reset-csv-btn:hover{border-color:var(--red);color:var(--red)}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">NASDAQ<span> 100</span> — Stock Graph</div>
+    <div class="subtitle" id="subtitle">62 stocks · 353 relationships</div>
+  </div>
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="setMode('direct',this)">📊 Direct</button>
+    <button class="mode-tab" onclick="setMode('cluster',this)">🔵 Cluster</button>
+    <div style="width:1px;height:20px;background:var(--border);margin:0 4px;align-self:center"></div>
+    <button class="mode-tab" id="btn-classic" style="background:rgba(124,111,212,.15);border-color:var(--purple);color:var(--purple)" onclick="setSentimentMode(false)">🎨 Classic</button>
+    <button class="mode-tab" id="btn-sentiment" onclick="setSentimentMode(true)">📈 Sentiment</button>
+  </div>
+</header>
+<div id="upload-bar">
+  <label id="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+    <input type="file" accept=".csv" onchange="onFileChange(event)"/>📂 อัพโหลด CSV
+  </label>
+  <span id="csv-status">NASDAQ 100 default — รองรับ CSV ที่มี column: Source, Target [, Type]</span>
+  <button id="reset-csv-btn" onclick="resetToDefault()">✕ กลับ default</button>
+</div>
+<div id="toolbar">
+  <input id="srch" placeholder="ค้นหา เช่น NVDA, AAPL" oninput="onSrch(this.value)"/>
+  <div class="sep"></div>
+  <button class="filter-btn on" data-f="all" onclick="setF('all')">ทั้งหมด</button>
+  <button class="filter-btn" data-f="competitors" onclick="setF('competitors')">Competitors</button>
+  <button class="filter-btn" data-f="customers" onclick="setF('customers')">Customers</button>
+  <button class="filter-btn" data-f="suppliers" onclick="setF('suppliers')">Suppliers</button>
+  <!-- sentiment filters — แสดงเฉพาะตอน sentiment mode -->
+  <div id="sentiment-filters">
+    <div class="sep"></div>
+    <button class="filter-btn on" data-f="all" onclick="setSentimentFilter('all')" id="sf-all">ทั้งหมด</button>
+    <button class="filter-btn" data-f="up" onclick="setSentimentFilter('up')" id="sf-up">🟢 เขียวตาม</button>
+    <button class="filter-btn" data-f="dn" onclick="setSentimentFilter('dn')" id="sf-dn">🔴 แดงตาม</button>
+  </div>
+  <div class="sep"></div>
+  <button class="reset-btn" onclick="doReset()">↺ Reset view</button>
+</div>
+<div id="infobar">คลิก node เพื่อดู relationships · ลากได้ · scroll zoom</div>
+<div id="canvas-wrap">
+  <canvas id="gc"></canvas>
+  <div id="mode-desc"><strong style="color:var(--text)">📊 Direct mode</strong><br>เส้นเชื่อมโดยตรงระหว่างหุ้น<br>สีเส้น = ประเภทความสัมพันธ์</div>
+  <div id="legend">
+    <div class="leg-row"><span class="leg-line" style="background:var(--red)"></span>Competitors</div>
+    <div class="leg-row"><span class="leg-line" style="background:var(--green)"></span>Customers</div>
+    <div class="leg-row"><span class="leg-line" style="background:var(--gray)"></span>Suppliers</div>
+    <div style="height:4px;border-top:1px solid var(--border);margin:2px 0"></div>
+    <div class="leg-row"><span class="leg-dot"></span>หุ้น (ขนาด = connections)</div>
+  </div>
+  <div id="hint">🖱 scroll=zoom<br>✋ drag bg=pan<br>🖱 drag node=move<br>👆 click=highlight</div>
+</div>
+<script>
+const STOCKS=[{id:"MDLZ",c:1},{id:"MCHP",c:2},{id:"AAPL",c:22},{id:"PEP",c:5},{id:"REGN",c:2},{id:"GOOGL",c:33},{id:"MU",c:21},{id:"MELI",c:2},{id:"AMGN",c:5},{id:"CRM",c:1},{id:"VRTX",c:2},{id:"SHOP",c:2},{id:"WDAY",c:1},{id:"LITE",c:2},{id:"CMCSA",c:1},{id:"CSCO",c:20},{id:"NXPI",c:5},{id:"PANW",c:14},{id:"INTC",c:27},{id:"WMT",c:6},{id:"STX",c:12},{id:"WDC",c:13},{id:"PLTR",c:9},{id:"ALNY",c:2},{id:"SNDK",c:13},{id:"ADI",c:13},{id:"BKNG",c:1},{id:"SNPS",c:2},{id:"FTNT",c:5},{id:"DDOG",c:4},{id:"TXN",c:11},{id:"ZS",c:6},{id:"KLAC",c:18},{id:"PDD",c:3},{id:"MSFT",c:44},{id:"WBD",c:1},{id:"AMZN",c:44},{id:"MNST",c:1},{id:"AVGO",c:23},{id:"LIN",c:4},{id:"META",c:17},{id:"LRCX",c:26},{id:"CDNS",c:2},{id:"ORCL",c:1},{id:"AMD",c:31},{id:"TMUS",c:4},{id:"GILD",c:5},{id:"QCOM",c:24},{id:"ASML",c:26},{id:"ARM",c:14},{id:"ADBE",c:2},{id:"APP",c:9},{id:"SWKS",c:1},{id:"AMAT",c:27},{id:"MPWR",c:5},{id:"NFLX",c:11},{id:"NVDA",c:46},{id:"CRWD",c:15},{id:"MRVL",c:18},{id:"COST",c:6},{id:"TSLA",c:12},{id:"ABNB",c:1}];
+const LINKS=[{s:"NVDA",t:"AMD",y:"competitors"},{s:"NVDA",t:"INTC",y:"competitors"},{s:"NVDA",t:"AVGO",y:"competitors"},{s:"NVDA",t:"QCOM",y:"competitors"},{s:"NVDA",t:"MRVL",y:"competitors"},{s:"NVDA",t:"CSCO",y:"competitors"},{s:"NVDA",t:"ARM",y:"competitors"},{s:"NVDA",t:"LITE",y:"competitors"},{s:"NVDA",t:"MSFT",y:"customers"},{s:"NVDA",t:"AMZN",y:"customers"},{s:"NVDA",t:"GOOGL",y:"customers"},{s:"NVDA",t:"META",y:"customers"},{s:"NVDA",t:"TSLA",y:"customers"},{s:"NVDA",t:"PLTR",y:"customers"},{s:"NVDA",t:"PANW",y:"customers"},{s:"NVDA",t:"CRWD",y:"customers"},{s:"NVDA",t:"CDNS",y:"customers"},{s:"NVDA",t:"SNPS",y:"customers"},{s:"NVDA",t:"ASML",y:"suppliers"},{s:"NVDA",t:"AMAT",y:"suppliers"},{s:"NVDA",t:"LRCX",y:"suppliers"},{s:"NVDA",t:"KLAC",y:"suppliers"},{s:"NVDA",t:"MU",y:"suppliers"},{s:"NVDA",t:"MPWR",y:"suppliers"},{s:"NVDA",t:"LITE",y:"suppliers"},{s:"NVDA",t:"SNDK",y:"suppliers"},{s:"AAPL",t:"MSFT",y:"competitors"},{s:"AAPL",t:"GOOGL",y:"competitors"},{s:"AAPL",t:"META",y:"competitors"},{s:"AAPL",t:"TSLA",y:"competitors"},{s:"AAPL",t:"AVGO",y:"suppliers"},{s:"AAPL",t:"QCOM",y:"suppliers"},{s:"AAPL",t:"ADI",y:"suppliers"},{s:"AAPL",t:"MPWR",y:"suppliers"},{s:"AAPL",t:"MU",y:"suppliers"},{s:"AAPL",t:"NXPI",y:"suppliers"},{s:"AAPL",t:"SWKS",y:"suppliers"},{s:"AAPL",t:"GOOGL",y:"customers"},{s:"MSFT",t:"AMZN",y:"competitors"},{s:"MSFT",t:"GOOGL",y:"competitors"},{s:"MSFT",t:"ORCL",y:"competitors"},{s:"MSFT",t:"CRM",y:"competitors"},{s:"MSFT",t:"ADBE",y:"competitors"},{s:"MSFT",t:"PANW",y:"competitors"},{s:"MSFT",t:"CRWD",y:"competitors"},{s:"MSFT",t:"ZS",y:"competitors"},{s:"MSFT",t:"FTNT",y:"competitors"},{s:"MSFT",t:"DDOG",y:"competitors"},{s:"MSFT",t:"SNPS",y:"competitors"},{s:"MSFT",t:"CDNS",y:"competitors"},{s:"MSFT",t:"PANW",y:"customers"},{s:"MSFT",t:"CRWD",y:"customers"},{s:"MSFT",t:"DDOG",y:"customers"},{s:"MSFT",t:"ZS",y:"customers"},{s:"MSFT",t:"FTNT",y:"customers"},{s:"MSFT",t:"ADBE",y:"customers"},{s:"MSFT",t:"WDAY",y:"customers"},{s:"MSFT",t:"CSCO",y:"customers"},{s:"MSFT",t:"NVDA",y:"suppliers"},{s:"MSFT",t:"AMD",y:"suppliers"},{s:"MSFT",t:"INTC",y:"suppliers"},{s:"AMZN",t:"MSFT",y:"competitors"},{s:"AMZN",t:"GOOGL",y:"competitors"},{s:"AMZN",t:"COST",y:"competitors"},{s:"AMZN",t:"WMT",y:"competitors"},{s:"AMZN",t:"SHOP",y:"competitors"},{s:"AMZN",t:"MELI",y:"competitors"},{s:"AMZN",t:"PDD",y:"competitors"},{s:"AMZN",t:"NFLX",y:"competitors"},{s:"AMZN",t:"NFLX",y:"customers"},{s:"AMZN",t:"PANW",y:"customers"},{s:"AMZN",t:"CRWD",y:"customers"},{s:"AMZN",t:"DDOG",y:"customers"},{s:"AMZN",t:"ZS",y:"customers"},{s:"AMZN",t:"SHOP",y:"customers"},{s:"AMZN",t:"MELI",y:"customers"},{s:"AMZN",t:"PLTR",y:"customers"},{s:"AMZN",t:"NVDA",y:"suppliers"},{s:"AMZN",t:"AMD",y:"suppliers"},{s:"AMZN",t:"INTC",y:"suppliers"},{s:"AMZN",t:"CSCO",y:"suppliers"},{s:"AVGO",t:"NVDA",y:"competitors"},{s:"AVGO",t:"AMD",y:"competitors"},{s:"AVGO",t:"MRVL",y:"competitors"},{s:"AVGO",t:"QCOM",y:"competitors"},{s:"AVGO",t:"INTC",y:"competitors"},{s:"AVGO",t:"AAPL",y:"customers"},{s:"AVGO",t:"MSFT",y:"customers"},{s:"AVGO",t:"GOOGL",y:"customers"},{s:"AVGO",t:"META",y:"customers"},{s:"AVGO",t:"AMZN",y:"customers"},{s:"AVGO",t:"ASML",y:"suppliers"},{s:"AVGO",t:"AMAT",y:"suppliers"},{s:"AVGO",t:"LRCX",y:"suppliers"},{s:"GOOGL",t:"MSFT",y:"competitors"},{s:"GOOGL",t:"AMZN",y:"competitors"},{s:"GOOGL",t:"META",y:"competitors"},{s:"GOOGL",t:"NFLX",y:"competitors"},{s:"GOOGL",t:"AAPL",y:"competitors"},{s:"GOOGL",t:"AAPL",y:"customers"},{s:"GOOGL",t:"NFLX",y:"customers"},{s:"GOOGL",t:"BKNG",y:"customers"},{s:"GOOGL",t:"ABNB",y:"customers"},{s:"GOOGL",t:"NVDA",y:"suppliers"},{s:"GOOGL",t:"AMD",y:"suppliers"},{s:"GOOGL",t:"INTC",y:"suppliers"},{s:"GOOGL",t:"CSCO",y:"suppliers"},{s:"TSLA",t:"AAPL",y:"competitors"},{s:"TSLA",t:"QCOM",y:"competitors"},{s:"TSLA",t:"NVDA",y:"suppliers"},{s:"TSLA",t:"TXN",y:"suppliers"},{s:"TSLA",t:"ADI",y:"suppliers"},{s:"TSLA",t:"NXPI",y:"suppliers"},{s:"TSLA",t:"MPWR",y:"suppliers"},{s:"META",t:"GOOGL",y:"competitors"},{s:"META",t:"NFLX",y:"competitors"},{s:"META",t:"AMZN",y:"competitors"},{s:"META",t:"NVDA",y:"suppliers"},{s:"META",t:"AMD",y:"suppliers"},{s:"META",t:"ASML",y:"suppliers"},{s:"META",t:"AMAT",y:"suppliers"},{s:"META",t:"LRCX",y:"suppliers"},{s:"MU",t:"SNDK",y:"competitors"},{s:"MU",t:"STX",y:"competitors"},{s:"MU",t:"WDC",y:"competitors"},{s:"MU",t:"NVDA",y:"customers"},{s:"MU",t:"AAPL",y:"customers"},{s:"MU",t:"MSFT",y:"customers"},{s:"MU",t:"AMD",y:"customers"},{s:"MU",t:"ASML",y:"suppliers"},{s:"MU",t:"AMAT",y:"suppliers"},{s:"MU",t:"LRCX",y:"suppliers"},{s:"MU",t:"KLAC",y:"suppliers"},{s:"WMT",t:"AMZN",y:"competitors"},{s:"WMT",t:"COST",y:"competitors"},{s:"WMT",t:"PDD",y:"competitors"},{s:"AMD",t:"NVDA",y:"competitors"},{s:"AMD",t:"INTC",y:"competitors"},{s:"AMD",t:"AVGO",y:"competitors"},{s:"AMD",t:"QCOM",y:"competitors"},{s:"AMD",t:"MRVL",y:"competitors"},{s:"AMD",t:"ARM",y:"competitors"},{s:"AMD",t:"MSFT",y:"customers"},{s:"AMD",t:"AMZN",y:"customers"},{s:"AMD",t:"GOOGL",y:"customers"},{s:"AMD",t:"META",y:"customers"},{s:"AMD",t:"ASML",y:"suppliers"},{s:"AMD",t:"AMAT",y:"suppliers"},{s:"AMD",t:"LRCX",y:"suppliers"},{s:"AMD",t:"KLAC",y:"suppliers"},{s:"AMD",t:"MU",y:"suppliers"},{s:"ASML",t:"AMAT",y:"competitors"},{s:"ASML",t:"LRCX",y:"competitors"},{s:"ASML",t:"KLAC",y:"competitors"},{s:"ASML",t:"INTC",y:"customers"},{s:"ASML",t:"MU",y:"customers"},{s:"ASML",t:"NVDA",y:"customers"},{s:"ASML",t:"AMD",y:"customers"},{s:"ASML",t:"AVGO",y:"customers"},{s:"ASML",t:"QCOM",y:"customers"},{s:"INTC",t:"NVDA",y:"competitors"},{s:"INTC",t:"AMD",y:"competitors"},{s:"INTC",t:"QCOM",y:"competitors"},{s:"INTC",t:"ARM",y:"competitors"},{s:"INTC",t:"AVGO",y:"competitors"},{s:"INTC",t:"MSFT",y:"customers"},{s:"INTC",t:"AMZN",y:"customers"},{s:"INTC",t:"GOOGL",y:"customers"},{s:"INTC",t:"CSCO",y:"customers"},{s:"INTC",t:"ASML",y:"suppliers"},{s:"INTC",t:"AMAT",y:"suppliers"},{s:"INTC",t:"LRCX",y:"suppliers"},{s:"INTC",t:"KLAC",y:"suppliers"},{s:"CSCO",t:"MRVL",y:"competitors"},{s:"CSCO",t:"PANW",y:"competitors"},{s:"CSCO",t:"FTNT",y:"competitors"},{s:"CSCO",t:"CRWD",y:"competitors"},{s:"CSCO",t:"ZS",y:"competitors"},{s:"CSCO",t:"MSFT",y:"customers"},{s:"CSCO",t:"AMZN",y:"customers"},{s:"CSCO",t:"GOOGL",y:"customers"},{s:"CSCO",t:"META",y:"customers"},{s:"CSCO",t:"INTC",y:"suppliers"},{s:"CSCO",t:"AMD",y:"suppliers"},{s:"CSCO",t:"MRVL",y:"suppliers"},{s:"ARM",t:"NVDA",y:"competitors"},{s:"ARM",t:"INTC",y:"competitors"},{s:"ARM",t:"AMD",y:"competitors"},{s:"ARM",t:"QCOM",y:"customers"},{s:"ARM",t:"AVGO",y:"customers"},{s:"ARM",t:"MRVL",y:"customers"},{s:"ARM",t:"AMZN",y:"customers"},{s:"ARM",t:"MSFT",y:"customers"},{s:"ARM",t:"GOOGL",y:"customers"},{s:"ARM",t:"AAPL",y:"customers"},{s:"COST",t:"AMZN",y:"competitors"},{s:"COST",t:"WMT",y:"competitors"},{s:"COST",t:"PDD",y:"competitors"},{s:"LRCX",t:"AMAT",y:"competitors"},{s:"LRCX",t:"KLAC",y:"competitors"},{s:"LRCX",t:"ASML",y:"competitors"},{s:"LRCX",t:"NVDA",y:"customers"},{s:"LRCX",t:"AMD",y:"customers"},{s:"LRCX",t:"INTC",y:"customers"},{s:"LRCX",t:"MU",y:"customers"},{s:"LRCX",t:"AVGO",y:"customers"},{s:"LRCX",t:"QCOM",y:"customers"},{s:"AMAT",t:"LRCX",y:"competitors"},{s:"AMAT",t:"KLAC",y:"competitors"},{s:"AMAT",t:"ASML",y:"competitors"},{s:"AMAT",t:"NVDA",y:"customers"},{s:"AMAT",t:"AMD",y:"customers"},{s:"AMAT",t:"INTC",y:"customers"},{s:"AMAT",t:"MU",y:"customers"},{s:"AMAT",t:"AVGO",y:"customers"},{s:"AMAT",t:"QCOM",y:"customers"},{s:"AMAT",t:"ASML",y:"customers"},{s:"NFLX",t:"AMZN",y:"competitors"},{s:"NFLX",t:"GOOGL",y:"competitors"},{s:"NFLX",t:"CMCSA",y:"competitors"},{s:"NFLX",t:"WBD",y:"competitors"},{s:"NFLX",t:"AMZN",y:"suppliers"},{s:"NFLX",t:"MSFT",y:"suppliers"},{s:"PLTR",t:"DDOG",y:"competitors"},{s:"PLTR",t:"CRWD",y:"competitors"},{s:"PLTR",t:"PANW",y:"competitors"},{s:"PLTR",t:"NVDA",y:"suppliers"},{s:"PLTR",t:"AMZN",y:"suppliers"},{s:"PLTR",t:"MSFT",y:"suppliers"},{s:"PLTR",t:"GOOGL",y:"suppliers"},{s:"TXN",t:"ADI",y:"competitors"},{s:"TXN",t:"MCHP",y:"competitors"},{s:"TXN",t:"NXPI",y:"competitors"},{s:"TXN",t:"MPWR",y:"competitors"},{s:"TXN",t:"AAPL",y:"customers"},{s:"TXN",t:"TSLA",y:"customers"},{s:"TXN",t:"ASML",y:"suppliers"},{s:"TXN",t:"AMAT",y:"suppliers"},{s:"TXN",t:"LRCX",y:"suppliers"},{s:"KLAC",t:"AMAT",y:"competitors"},{s:"KLAC",t:"LRCX",y:"competitors"},{s:"KLAC",t:"ASML",y:"competitors"},{s:"KLAC",t:"NVDA",y:"customers"},{s:"KLAC",t:"AMD",y:"customers"},{s:"KLAC",t:"INTC",y:"customers"},{s:"KLAC",t:"MU",y:"customers"},{s:"KLAC",t:"AVGO",y:"customers"},{s:"KLAC",t:"QCOM",y:"customers"},{s:"SNDK",t:"MU",y:"competitors"},{s:"SNDK",t:"STX",y:"competitors"},{s:"SNDK",t:"WDC",y:"competitors"},{s:"SNDK",t:"NVDA",y:"customers"},{s:"SNDK",t:"MSFT",y:"customers"},{s:"SNDK",t:"AMZN",y:"customers"},{s:"SNDK",t:"ASML",y:"suppliers"},{s:"SNDK",t:"AMAT",y:"suppliers"},{s:"SNDK",t:"LRCX",y:"suppliers"},{s:"MRVL",t:"AVGO",y:"competitors"},{s:"MRVL",t:"NVDA",y:"competitors"},{s:"MRVL",t:"QCOM",y:"competitors"},{s:"MRVL",t:"AMD",y:"competitors"},{s:"MRVL",t:"AMZN",y:"customers"},{s:"MRVL",t:"GOOGL",y:"customers"},{s:"MRVL",t:"MSFT",y:"customers"},{s:"MRVL",t:"META",y:"customers"},{s:"MRVL",t:"ASML",y:"suppliers"},{s:"MRVL",t:"AMAT",y:"suppliers"},{s:"MRVL",t:"LRCX",y:"suppliers"},{s:"QCOM",t:"NVDA",y:"competitors"},{s:"QCOM",t:"AMD",y:"competitors"},{s:"QCOM",t:"INTC",y:"competitors"},{s:"QCOM",t:"MRVL",y:"competitors"},{s:"QCOM",t:"NXPI",y:"competitors"},{s:"QCOM",t:"ARM",y:"competitors"},{s:"QCOM",t:"TSLA",y:"competitors"},{s:"QCOM",t:"AAPL",y:"customers"},{s:"QCOM",t:"ASML",y:"suppliers"},{s:"QCOM",t:"AMAT",y:"suppliers"},{s:"QCOM",t:"LRCX",y:"suppliers"},{s:"PANW",t:"CRWD",y:"competitors"},{s:"PANW",t:"FTNT",y:"competitors"},{s:"PANW",t:"ZS",y:"competitors"},{s:"PANW",t:"MSFT",y:"competitors"},{s:"PANW",t:"CSCO",y:"competitors"},{s:"PANW",t:"AMZN",y:"suppliers"},{s:"PANW",t:"MSFT",y:"suppliers"},{s:"ADI",t:"TXN",y:"competitors"},{s:"ADI",t:"MCHP",y:"competitors"},{s:"ADI",t:"NXPI",y:"competitors"},{s:"ADI",t:"MPWR",y:"competitors"},{s:"ADI",t:"AAPL",y:"customers"},{s:"ADI",t:"TSLA",y:"customers"},{s:"ADI",t:"NVDA",y:"customers"},{s:"ADI",t:"ASML",y:"suppliers"},{s:"ADI",t:"AMAT",y:"suppliers"},{s:"ADI",t:"LRCX",y:"suppliers"},{s:"LIN",t:"INTC",y:"customers"},{s:"LIN",t:"AMAT",y:"customers"},{s:"LIN",t:"LRCX",y:"customers"},{s:"LIN",t:"ASML",y:"customers"},{s:"PEP",t:"MNST",y:"competitors"},{s:"PEP",t:"MDLZ",y:"competitors"},{s:"PEP",t:"WMT",y:"customers"},{s:"PEP",t:"COST",y:"customers"},{s:"PEP",t:"AMZN",y:"customers"},{s:"STX",t:"WDC",y:"competitors"},{s:"STX",t:"MU",y:"competitors"},{s:"STX",t:"SNDK",y:"competitors"},{s:"STX",t:"AMZN",y:"customers"},{s:"STX",t:"MSFT",y:"customers"},{s:"STX",t:"GOOGL",y:"customers"},{s:"STX",t:"AMAT",y:"suppliers"},{s:"STX",t:"LRCX",y:"suppliers"},{s:"STX",t:"KLAC",y:"suppliers"},{s:"WDC",t:"MU",y:"competitors"},{s:"WDC",t:"STX",y:"competitors"},{s:"WDC",t:"SNDK",y:"competitors"},{s:"WDC",t:"AMZN",y:"customers"},{s:"WDC",t:"MSFT",y:"customers"},{s:"WDC",t:"GOOGL",y:"customers"},{s:"WDC",t:"AMAT",y:"suppliers"},{s:"WDC",t:"LRCX",y:"suppliers"},{s:"WDC",t:"KLAC",y:"suppliers"},{s:"WDC",t:"ASML",y:"suppliers"},{s:"TMUS",t:"CSCO",y:"competitors"},{s:"TMUS",t:"QCOM",y:"suppliers"},{s:"TMUS",t:"AAPL",y:"suppliers"},{s:"TMUS",t:"NVDA",y:"suppliers"},{s:"APP",t:"GOOGL",y:"competitors"},{s:"APP",t:"META",y:"competitors"},{s:"APP",t:"AMZN",y:"competitors"},{s:"APP",t:"GOOGL",y:"customers"},{s:"APP",t:"META",y:"customers"},{s:"APP",t:"AMZN",y:"customers"},{s:"APP",t:"AMZN",y:"suppliers"},{s:"APP",t:"GOOGL",y:"suppliers"},{s:"APP",t:"MSFT",y:"suppliers"},{s:"CRWD",t:"PANW",y:"competitors"},{s:"CRWD",t:"FTNT",y:"competitors"},{s:"CRWD",t:"ZS",y:"competitors"},{s:"CRWD",t:"MSFT",y:"competitors"},{s:"CRWD",t:"CSCO",y:"competitors"},{s:"CRWD",t:"AMZN",y:"suppliers"},{s:"CRWD",t:"MSFT",y:"suppliers"},{s:"CRWD",t:"GOOGL",y:"suppliers"},{s:"AMGN",t:"GILD",y:"competitors"},{s:"AMGN",t:"VRTX",y:"competitors"},{s:"AMGN",t:"REGN",y:"competitors"},{s:"AMGN",t:"ALNY",y:"competitors"},{s:"GILD",t:"AMGN",y:"competitors"},{s:"GILD",t:"VRTX",y:"competitors"},{s:"GILD",t:"REGN",y:"competitors"},{s:"GILD",t:"ALNY",y:"competitors"}];
+const CNODES=[{id:"APP",type:"stock",conn:3},{id:"GOOGL_CUSTOMERS",type:"customers",conn:5},{id:"COST",type:"stock",conn:6},{id:"PLTR_CUSTOMERS",type:"customers",conn:1},{id:"PEP_SUPPLIERS",type:"suppliers",conn:1},{id:"AAPL_COMPETITORS",type:"competitors",conn:5},{id:"PDD",type:"stock",conn:3},{id:"TMUS_SUPPLIERS",type:"suppliers",conn:4},{id:"WMT",type:"stock",conn:6},{id:"COST_CUSTOMERS",type:"customers",conn:1},{id:"TMUS",type:"stock",conn:3},{id:"AMD",type:"stock",conn:19},{id:"GOOG",type:"stock",conn:1},{id:"CSCO_COMPETITORS",type:"competitors",conn:6},{id:"GOOGL",type:"stock",conn:24},{id:"SWKS",type:"stock",conn:1},{id:"SNDK",type:"stock",conn:7},{id:"ARM_SUPPLIERS",type:"suppliers",conn:1},{id:"DDOG",type:"stock",conn:4},{id:"WDAY",type:"stock",conn:1},{id:"QCOM_COMPETITORS",type:"competitors",conn:8},{id:"ADBE",type:"stock",conn:2},{id:"STX_SUPPLIERS",type:"suppliers",conn:4},{id:"CRWD_CUSTOMERS",type:"customers",conn:1},{id:"WMT_COMPETITORS",type:"competitors",conn:4},{id:"INTC",type:"stock",conn:17},{id:"ORCL",type:"stock",conn:1},{id:"AMGN_CUSTOMERS",type:"customers",conn:1},{id:"COST_COMPETITORS",type:"competitors",conn:4},{id:"TXN",type:"stock",conn:5},{id:"PANW_COMPETITORS",type:"competitors",conn:6},{id:"BKNG",type:"stock",conn:1},{id:"AMAT_CUSTOMERS",type:"customers",conn:8},{id:"AMGN_COMPETITORS",type:"competitors",conn:5},{id:"ADI_COMPETITORS",type:"competitors",conn:5},{id:"TMUS_CUSTOMERS",type:"customers",conn:1},{id:"STX_COMPETITORS",type:"competitors",conn:4},{id:"SNPS",type:"stock",conn:2},{id:"AVGO_SUPPLIERS",type:"suppliers",conn:4},{id:"AVGO",type:"stock",conn:13},{id:"NFLX_CUSTOMERS",type:"customers",conn:1},{id:"KLAC_SUPPLIERS",type:"suppliers",conn:1},{id:"NVDA_COMPETITORS",type:"competitors",conn:9},{id:"MELI",type:"stock",conn:2},{id:"GILD_SUPPLIERS",type:"suppliers",conn:1},{id:"AMAT",type:"stock",conn:20},{id:"NVDA",type:"stock",conn:23},{id:"AMAT_SUPPLIERS",type:"suppliers",conn:1},{id:"AMD_COMPETITORS",type:"competitors",conn:7},{id:"AMD_CUSTOMERS",type:"customers",conn:5},{id:"CRWD_COMPETITORS",type:"competitors",conn:6},{id:"STX",type:"stock",conn:6},{id:"WMT_SUPPLIERS",type:"suppliers",conn:1},{id:"AAPL",type:"stock",conn:13},{id:"ASML_CUSTOMERS",type:"customers",conn:7},{id:"AAPL_CUSTOMERS",type:"customers",conn:2},{id:"MSFT_SUPPLIERS",type:"suppliers",conn:4},{id:"PLTR_SUPPLIERS",type:"suppliers",conn:5},{id:"ADI_SUPPLIERS",type:"suppliers",conn:4},{id:"FTNT",type:"stock",conn:5},{id:"INTC_SUPPLIERS",type:"suppliers",conn:5},{id:"WDC",type:"stock",conn:6},{id:"PLTR",type:"stock",conn:5},{id:"MRVL",type:"stock",conn:10},{id:"LRCX",type:"stock",conn:20},{id:"WDC_SUPPLIERS",type:"suppliers",conn:5},{id:"QCOM_CUSTOMERS",type:"customers",conn:2},{id:"GOOGL_COMPETITORS",type:"competitors",conn:6},{id:"LITE",type:"stock",conn:2},{id:"SNDK_SUPPLIERS",type:"suppliers",conn:4},{id:"GILD_COMPETITORS",type:"competitors",conn:5},{id:"SNDK_CUSTOMERS",type:"customers",conn:4},{id:"MSFT",type:"stock",conn:24},{id:"MSFT_CUSTOMERS",type:"customers",conn:9},{id:"CMCSA",type:"stock",conn:1},{id:"MU",type:"stock",conn:13},{id:"AMZN",type:"stock",conn:27},{id:"VRTX",type:"stock",conn:2},{id:"WMT_CUSTOMERS",type:"customers",conn:1},{id:"KLAC",type:"stock",conn:12},{id:"PEP",type:"stock",conn:3},{id:"LRCX_COMPETITORS",type:"competitors",conn:4},{id:"KLAC_CUSTOMERS",type:"customers",conn:7},{id:"META_CUSTOMERS",type:"customers",conn:1},{id:"GILD_CUSTOMERS",type:"customers",conn:1},{id:"REGN",type:"stock",conn:2},{id:"AMZN_COMPETITORS",type:"competitors",conn:9},{id:"PEP_CUSTOMERS",type:"customers",conn:4},{id:"ADI_CUSTOMERS",type:"customers",conn:4},{id:"LRCX_SUPPLIERS",type:"suppliers",conn:1},{id:"ASML_COMPETITORS",type:"competitors",conn:4},{id:"META_SUPPLIERS",type:"suppliers",conn:6},{id:"MRVL_SUPPLIERS",type:"suppliers",conn:4},{id:"INTC_CUSTOMERS",type:"customers",conn:5},{id:"NVDA_CUSTOMERS",type:"customers",conn:11},{id:"ALNY",type:"stock",conn:2},{id:"WDC_COMPETITORS",type:"competitors",conn:4},{id:"PANW_SUPPLIERS",type:"suppliers",conn:3},{id:"AMD_SUPPLIERS",type:"suppliers",conn:6},{id:"NVDA_SUPPLIERS",type:"suppliers",conn:9},{id:"MSFT_COMPETITORS",type:"competitors",conn:13},{id:"AAPL_SUPPLIERS",type:"suppliers",conn:8},{id:"CSCO",type:"stock",conn:11},{id:"COST_SUPPLIERS",type:"suppliers",conn:1},{id:"ZS",type:"stock",conn:6},{id:"PLTR_COMPETITORS",type:"competitors",conn:4},{id:"WBD",type:"stock",conn:1},{id:"QCOM",type:"stock",conn:16},{id:"LIN_SUPPLIERS",type:"suppliers",conn:1},{id:"MU_COMPETITORS",type:"competitors",conn:4},{id:"LIN_COMPETITORS",type:"competitors",conn:1},{id:"QCOM_SUPPLIERS",type:"suppliers",conn:4},{id:"TMUS_COMPETITORS",type:"competitors",conn:2},{id:"ARM_COMPETITORS",type:"competitors",conn:4},{id:"TSLA_SUPPLIERS",type:"suppliers",conn:6},{id:"AMZN_SUPPLIERS",type:"suppliers",conn:5},{id:"APP_COMPETITORS",type:"competitors",conn:4},{id:"MCHP",type:"stock",conn:2},{id:"MRVL_COMPETITORS",type:"competitors",conn:5},{id:"SNDK_COMPETITORS",type:"competitors",conn:4},{id:"MPWR",type:"stock",conn:5},{id:"LRCX_CUSTOMERS",type:"customers",conn:7},{id:"PEP_COMPETITORS",type:"competitors",conn:3},{id:"NFLX_SUPPLIERS",type:"suppliers",conn:3},{id:"CRWD",type:"stock",conn:10},{id:"MU_CUSTOMERS",type:"customers",conn:5},{id:"META",type:"stock",conn:12},{id:"WDC_CUSTOMERS",type:"customers",conn:4},{id:"NFLX",type:"stock",conn:8},{id:"TXN_SUPPLIERS",type:"suppliers",conn:4},{id:"INTC_COMPETITORS",type:"competitors",conn:6},{id:"CRWD_SUPPLIERS",type:"suppliers",conn:4},{id:"TXN_COMPETITORS",type:"competitors",conn:5},{id:"TSLA_COMPETITORS",type:"competitors",conn:3},{id:"ASML",type:"stock",conn:20},{id:"ARM",type:"stock",conn:7},{id:"GOOGL_SUPPLIERS",type:"suppliers",conn:5},{id:"LIN_CUSTOMERS",type:"customers",conn:5},{id:"SHOP",type:"stock",conn:2},{id:"ARM_CUSTOMERS",type:"customers",conn:8},{id:"APP_SUPPLIERS",type:"suppliers",conn:4},{id:"META_COMPETITORS",type:"competitors",conn:4},{id:"ADI",type:"stock",conn:6},{id:"AMGN_SUPPLIERS",type:"suppliers",conn:1},{id:"ABNB",type:"stock",conn:1},{id:"APP_CUSTOMERS",type:"customers",conn:4},{id:"CSCO_CUSTOMERS",type:"customers",conn:5},{id:"AVGO_COMPETITORS",type:"competitors",conn:6},{id:"TSLA_CUSTOMERS",type:"customers",conn:1},{id:"AMGN",type:"stock",conn:4},{id:"PANW_CUSTOMERS",type:"customers",conn:1},{id:"MRVL_CUSTOMERS",type:"customers",conn:5},{id:"AMAT_COMPETITORS",type:"competitors",conn:4},{id:"KLAC_COMPETITORS",type:"competitors",conn:4},{id:"TSLA",type:"stock",conn:8},{id:"CSCO_SUPPLIERS",type:"suppliers",conn:4},{id:"TXN_CUSTOMERS",type:"customers",conn:3},{id:"MDLZ",type:"stock",conn:1},{id:"AMZN_CUSTOMERS",type:"customers",conn:9},{id:"CRM",type:"stock",conn:1},{id:"NXPI",type:"stock",conn:5},{id:"NFLX_COMPETITORS",type:"competitors",conn:5},{id:"AVGO_CUSTOMERS",type:"customers",conn:6},{id:"STX_CUSTOMERS",type:"customers",conn:4},{id:"PANW",type:"stock",conn:10},{id:"MU_SUPPLIERS",type:"suppliers",conn:5},{id:"LIN",type:"stock",conn:3},{id:"CDNS",type:"stock",conn:2},{id:"ASML_SUPPLIERS",type:"suppliers",conn:1},{id:"GILD",type:"stock",conn:4},{id:"MNST",type:"stock",conn:1}];
+const CLINKS=[{source:"NVDA",target:"NVDA_COMPETITORS"},{source:"NVDA",target:"NVDA_CUSTOMERS"},{source:"NVDA",target:"NVDA_SUPPLIERS"},{source:"NVDA_COMPETITORS",target:"AMD"},{source:"NVDA_COMPETITORS",target:"INTC"},{source:"NVDA_COMPETITORS",target:"AVGO"},{source:"NVDA_COMPETITORS",target:"QCOM"},{source:"NVDA_COMPETITORS",target:"MRVL"},{source:"NVDA_COMPETITORS",target:"CSCO"},{source:"NVDA_COMPETITORS",target:"ARM"},{source:"NVDA_COMPETITORS",target:"LITE"},{source:"NVDA_CUSTOMERS",target:"MSFT"},{source:"NVDA_CUSTOMERS",target:"AMZN"},{source:"NVDA_CUSTOMERS",target:"GOOGL"},{source:"NVDA_CUSTOMERS",target:"META"},{source:"NVDA_CUSTOMERS",target:"TSLA"},{source:"NVDA_CUSTOMERS",target:"PLTR"},{source:"NVDA_CUSTOMERS",target:"PANW"},{source:"NVDA_CUSTOMERS",target:"CRWD"},{source:"NVDA_CUSTOMERS",target:"CDNS"},{source:"NVDA_CUSTOMERS",target:"SNPS"},{source:"NVDA_SUPPLIERS",target:"ASML"},{source:"NVDA_SUPPLIERS",target:"AMAT"},{source:"NVDA_SUPPLIERS",target:"LRCX"},{source:"NVDA_SUPPLIERS",target:"KLAC"},{source:"NVDA_SUPPLIERS",target:"MU"},{source:"NVDA_SUPPLIERS",target:"MPWR"},{source:"NVDA_SUPPLIERS",target:"LITE"},{source:"NVDA_SUPPLIERS",target:"SNDK"},{source:"AAPL",target:"AAPL_COMPETITORS"},{source:"AAPL",target:"AAPL_CUSTOMERS"},{source:"AAPL",target:"AAPL_SUPPLIERS"},{source:"AAPL_COMPETITORS",target:"MSFT"},{source:"AAPL_COMPETITORS",target:"GOOGL"},{source:"AAPL_COMPETITORS",target:"META"},{source:"AAPL_COMPETITORS",target:"TSLA"},{source:"AAPL_SUPPLIERS",target:"AVGO"},{source:"AAPL_SUPPLIERS",target:"QCOM"},{source:"AAPL_SUPPLIERS",target:"ADI"},{source:"AAPL_SUPPLIERS",target:"MPWR"},{source:"AAPL_SUPPLIERS",target:"MU"},{source:"AAPL_SUPPLIERS",target:"NXPI"},{source:"AAPL_SUPPLIERS",target:"SWKS"},{source:"AAPL_CUSTOMERS",target:"GOOGL"},{source:"MSFT",target:"MSFT_COMPETITORS"},{source:"MSFT",target:"MSFT_CUSTOMERS"},{source:"MSFT",target:"MSFT_SUPPLIERS"},{source:"MSFT_COMPETITORS",target:"AMZN"},{source:"MSFT_COMPETITORS",target:"GOOGL"},{source:"MSFT_COMPETITORS",target:"ORCL"},{source:"MSFT_COMPETITORS",target:"CRM"},{source:"MSFT_COMPETITORS",target:"ADBE"},{source:"MSFT_COMPETITORS",target:"PANW"},{source:"MSFT_COMPETITORS",target:"CRWD"},{source:"MSFT_COMPETITORS",target:"ZS"},{source:"MSFT_COMPETITORS",target:"FTNT"},{source:"MSFT_COMPETITORS",target:"DDOG"},{source:"MSFT_COMPETITORS",target:"SNPS"},{source:"MSFT_COMPETITORS",target:"CDNS"},{source:"MSFT_CUSTOMERS",target:"PANW"},{source:"MSFT_CUSTOMERS",target:"CRWD"},{source:"MSFT_CUSTOMERS",target:"DDOG"},{source:"MSFT_CUSTOMERS",target:"ZS"},{source:"MSFT_CUSTOMERS",target:"FTNT"},{source:"MSFT_CUSTOMERS",target:"ADBE"},{source:"MSFT_CUSTOMERS",target:"WDAY"},{source:"MSFT_CUSTOMERS",target:"CSCO"},{source:"MSFT_SUPPLIERS",target:"NVDA"},{source:"MSFT_SUPPLIERS",target:"AMD"},{source:"MSFT_SUPPLIERS",target:"INTC"},{source:"AMZN",target:"AMZN_COMPETITORS"},{source:"AMZN",target:"AMZN_CUSTOMERS"},{source:"AMZN",target:"AMZN_SUPPLIERS"},{source:"AMZN_COMPETITORS",target:"MSFT"},{source:"AMZN_COMPETITORS",target:"GOOGL"},{source:"AMZN_COMPETITORS",target:"COST"},{source:"AMZN_COMPETITORS",target:"WMT"},{source:"AMZN_COMPETITORS",target:"SHOP"},{source:"AMZN_COMPETITORS",target:"MELI"},{source:"AMZN_COMPETITORS",target:"PDD"},{source:"AMZN_COMPETITORS",target:"NFLX"},{source:"AMZN_CUSTOMERS",target:"NFLX"},{source:"AMZN_CUSTOMERS",target:"PANW"},{source:"AMZN_CUSTOMERS",target:"CRWD"},{source:"AMZN_CUSTOMERS",target:"DDOG"},{source:"AMZN_CUSTOMERS",target:"ZS"},{source:"AMZN_CUSTOMERS",target:"SHOP"},{source:"AMZN_CUSTOMERS",target:"MELI"},{source:"AMZN_CUSTOMERS",target:"PLTR"},{source:"AMZN_SUPPLIERS",target:"NVDA"},{source:"AMZN_SUPPLIERS",target:"AMD"},{source:"AMZN_SUPPLIERS",target:"INTC"},{source:"AMZN_SUPPLIERS",target:"CSCO"},{source:"AVGO",target:"AVGO_COMPETITORS"},{source:"AVGO",target:"AVGO_CUSTOMERS"},{source:"AVGO",target:"AVGO_SUPPLIERS"},{source:"AVGO_COMPETITORS",target:"NVDA"},{source:"AVGO_COMPETITORS",target:"AMD"},{source:"AVGO_COMPETITORS",target:"MRVL"},{source:"AVGO_COMPETITORS",target:"QCOM"},{source:"AVGO_COMPETITORS",target:"INTC"},{source:"AVGO_CUSTOMERS",target:"AAPL"},{source:"AVGO_CUSTOMERS",target:"MSFT"},{source:"AVGO_CUSTOMERS",target:"GOOGL"},{source:"AVGO_CUSTOMERS",target:"META"},{source:"AVGO_CUSTOMERS",target:"AMZN"},{source:"AVGO_SUPPLIERS",target:"ASML"},{source:"AVGO_SUPPLIERS",target:"AMAT"},{source:"AVGO_SUPPLIERS",target:"LRCX"},{source:"GOOGL",target:"GOOGL_COMPETITORS"},{source:"GOOGL",target:"GOOGL_CUSTOMERS"},{source:"GOOGL",target:"GOOGL_SUPPLIERS"},{source:"GOOGL_COMPETITORS",target:"MSFT"},{source:"GOOGL_COMPETITORS",target:"AMZN"},{source:"GOOGL_COMPETITORS",target:"META"},{source:"GOOGL_COMPETITORS",target:"NFLX"},{source:"GOOGL_COMPETITORS",target:"AAPL"},{source:"GOOGL_CUSTOMERS",target:"AAPL"},{source:"GOOGL_CUSTOMERS",target:"NFLX"},{source:"GOOGL_CUSTOMERS",target:"BKNG"},{source:"GOOGL_CUSTOMERS",target:"ABNB"},{source:"GOOGL_SUPPLIERS",target:"NVDA"},{source:"GOOGL_SUPPLIERS",target:"AMD"},{source:"GOOGL_SUPPLIERS",target:"INTC"},{source:"GOOGL_SUPPLIERS",target:"CSCO"},{source:"GOOG",target:"GOOGL"},{source:"TSLA",target:"TSLA_COMPETITORS"},{source:"TSLA",target:"TSLA_CUSTOMERS"},{source:"TSLA",target:"TSLA_SUPPLIERS"},{source:"TSLA_COMPETITORS",target:"AAPL"},{source:"TSLA_SUPPLIERS",target:"NVDA"},{source:"TSLA_COMPETITORS",target:"QCOM"},{source:"TSLA_SUPPLIERS",target:"TXN"},{source:"TSLA_SUPPLIERS",target:"ADI"},{source:"TSLA_SUPPLIERS",target:"NXPI"},{source:"TSLA_SUPPLIERS",target:"MPWR"},{source:"META",target:"META_COMPETITORS"},{source:"META",target:"META_CUSTOMERS"},{source:"META",target:"META_SUPPLIERS"},{source:"META_COMPETITORS",target:"GOOGL"},{source:"META_COMPETITORS",target:"NFLX"},{source:"META_COMPETITORS",target:"AMZN"},{source:"META_SUPPLIERS",target:"NVDA"},{source:"META_SUPPLIERS",target:"AMD"},{source:"META_SUPPLIERS",target:"ASML"},{source:"META_SUPPLIERS",target:"AMAT"},{source:"META_SUPPLIERS",target:"LRCX"},{source:"MU",target:"MU_COMPETITORS"},{source:"MU",target:"MU_CUSTOMERS"},{source:"MU",target:"MU_SUPPLIERS"},{source:"MU_COMPETITORS",target:"SNDK"},{source:"MU_COMPETITORS",target:"STX"},{source:"MU_COMPETITORS",target:"WDC"},{source:"MU_CUSTOMERS",target:"NVDA"},{source:"MU_CUSTOMERS",target:"AAPL"},{source:"MU_CUSTOMERS",target:"MSFT"},{source:"MU_CUSTOMERS",target:"AMD"},{source:"MU_SUPPLIERS",target:"ASML"},{source:"MU_SUPPLIERS",target:"AMAT"},{source:"MU_SUPPLIERS",target:"LRCX"},{source:"MU_SUPPLIERS",target:"KLAC"},{source:"WMT",target:"WMT_COMPETITORS"},{source:"WMT",target:"WMT_CUSTOMERS"},{source:"WMT",target:"WMT_SUPPLIERS"},{source:"WMT_COMPETITORS",target:"AMZN"},{source:"WMT_COMPETITORS",target:"COST"},{source:"WMT_COMPETITORS",target:"PDD"},{source:"AMD",target:"AMD_COMPETITORS"},{source:"AMD",target:"AMD_CUSTOMERS"},{source:"AMD",target:"AMD_SUPPLIERS"},{source:"AMD_COMPETITORS",target:"NVDA"},{source:"AMD_COMPETITORS",target:"INTC"},{source:"AMD_COMPETITORS",target:"AVGO"},{source:"AMD_COMPETITORS",target:"QCOM"},{source:"AMD_COMPETITORS",target:"MRVL"},{source:"AMD_COMPETITORS",target:"ARM"},{source:"AMD_CUSTOMERS",target:"MSFT"},{source:"AMD_CUSTOMERS",target:"AMZN"},{source:"AMD_CUSTOMERS",target:"GOOGL"},{source:"AMD_CUSTOMERS",target:"META"},{source:"AMD_SUPPLIERS",target:"ASML"},{source:"AMD_SUPPLIERS",target:"AMAT"},{source:"AMD_SUPPLIERS",target:"LRCX"},{source:"AMD_SUPPLIERS",target:"KLAC"},{source:"AMD_SUPPLIERS",target:"MU"},{source:"ASML",target:"ASML_COMPETITORS"},{source:"ASML",target:"ASML_CUSTOMERS"},{source:"ASML",target:"ASML_SUPPLIERS"},{source:"ASML_COMPETITORS",target:"AMAT"},{source:"ASML_COMPETITORS",target:"LRCX"},{source:"ASML_COMPETITORS",target:"KLAC"},{source:"ASML_CUSTOMERS",target:"INTC"},{source:"ASML_CUSTOMERS",target:"MU"},{source:"ASML_CUSTOMERS",target:"NVDA"},{source:"ASML_CUSTOMERS",target:"AMD"},{source:"ASML_CUSTOMERS",target:"AVGO"},{source:"ASML_CUSTOMERS",target:"QCOM"},{source:"INTC",target:"INTC_COMPETITORS"},{source:"INTC",target:"INTC_CUSTOMERS"},{source:"INTC",target:"INTC_SUPPLIERS"},{source:"INTC_COMPETITORS",target:"NVDA"},{source:"INTC_COMPETITORS",target:"AMD"},{source:"INTC_COMPETITORS",target:"QCOM"},{source:"INTC_COMPETITORS",target:"ARM"},{source:"INTC_COMPETITORS",target:"AVGO"},{source:"INTC_CUSTOMERS",target:"MSFT"},{source:"INTC_CUSTOMERS",target:"AMZN"},{source:"INTC_CUSTOMERS",target:"GOOGL"},{source:"INTC_CUSTOMERS",target:"CSCO"},{source:"INTC_SUPPLIERS",target:"ASML"},{source:"INTC_SUPPLIERS",target:"AMAT"},{source:"INTC_SUPPLIERS",target:"LRCX"},{source:"INTC_SUPPLIERS",target:"KLAC"},{source:"CSCO",target:"CSCO_COMPETITORS"},{source:"CSCO",target:"CSCO_CUSTOMERS"},{source:"CSCO",target:"CSCO_SUPPLIERS"},{source:"CSCO_COMPETITORS",target:"MRVL"},{source:"CSCO_COMPETITORS",target:"PANW"},{source:"CSCO_COMPETITORS",target:"FTNT"},{source:"CSCO_COMPETITORS",target:"CRWD"},{source:"CSCO_COMPETITORS",target:"ZS"},{source:"CSCO_CUSTOMERS",target:"MSFT"},{source:"CSCO_CUSTOMERS",target:"AMZN"},{source:"CSCO_CUSTOMERS",target:"GOOGL"},{source:"CSCO_CUSTOMERS",target:"META"},{source:"CSCO_SUPPLIERS",target:"INTC"},{source:"CSCO_SUPPLIERS",target:"AMD"},{source:"CSCO_SUPPLIERS",target:"MRVL"},{source:"ARM",target:"ARM_COMPETITORS"},{source:"ARM",target:"ARM_CUSTOMERS"},{source:"ARM",target:"ARM_SUPPLIERS"},{source:"ARM_COMPETITORS",target:"NVDA"},{source:"ARM_COMPETITORS",target:"INTC"},{source:"ARM_COMPETITORS",target:"AMD"},{source:"ARM_CUSTOMERS",target:"QCOM"},{source:"ARM_CUSTOMERS",target:"AVGO"},{source:"ARM_CUSTOMERS",target:"MRVL"},{source:"ARM_CUSTOMERS",target:"AMZN"},{source:"ARM_CUSTOMERS",target:"MSFT"},{source:"ARM_CUSTOMERS",target:"GOOGL"},{source:"ARM_CUSTOMERS",target:"AAPL"},{source:"COST",target:"COST_COMPETITORS"},{source:"COST",target:"COST_CUSTOMERS"},{source:"COST",target:"COST_SUPPLIERS"},{source:"COST_COMPETITORS",target:"AMZN"},{source:"COST_COMPETITORS",target:"WMT"},{source:"COST_COMPETITORS",target:"PDD"},{source:"LRCX",target:"LRCX_COMPETITORS"},{source:"LRCX",target:"LRCX_CUSTOMERS"},{source:"LRCX",target:"LRCX_SUPPLIERS"},{source:"LRCX_COMPETITORS",target:"AMAT"},{source:"LRCX_COMPETITORS",target:"KLAC"},{source:"LRCX_COMPETITORS",target:"ASML"},{source:"LRCX_CUSTOMERS",target:"NVDA"},{source:"LRCX_CUSTOMERS",target:"AMD"},{source:"LRCX_CUSTOMERS",target:"INTC"},{source:"LRCX_CUSTOMERS",target:"MU"},{source:"LRCX_CUSTOMERS",target:"AVGO"},{source:"LRCX_CUSTOMERS",target:"QCOM"},{source:"AMAT",target:"AMAT_COMPETITORS"},{source:"AMAT",target:"AMAT_CUSTOMERS"},{source:"AMAT",target:"AMAT_SUPPLIERS"},{source:"AMAT_COMPETITORS",target:"LRCX"},{source:"AMAT_COMPETITORS",target:"KLAC"},{source:"AMAT_COMPETITORS",target:"ASML"},{source:"AMAT_CUSTOMERS",target:"NVDA"},{source:"AMAT_CUSTOMERS",target:"AMD"},{source:"AMAT_CUSTOMERS",target:"INTC"},{source:"AMAT_CUSTOMERS",target:"MU"},{source:"AMAT_CUSTOMERS",target:"AVGO"},{source:"AMAT_CUSTOMERS",target:"QCOM"},{source:"AMAT_CUSTOMERS",target:"ASML"},{source:"NFLX",target:"NFLX_COMPETITORS"},{source:"NFLX",target:"NFLX_CUSTOMERS"},{source:"NFLX",target:"NFLX_SUPPLIERS"},{source:"NFLX_COMPETITORS",target:"AMZN"},{source:"NFLX_COMPETITORS",target:"GOOGL"},{source:"NFLX_COMPETITORS",target:"CMCSA"},{source:"NFLX_COMPETITORS",target:"WBD"},{source:"NFLX_SUPPLIERS",target:"AMZN"},{source:"NFLX_SUPPLIERS",target:"MSFT"},{source:"PLTR",target:"PLTR_COMPETITORS"},{source:"PLTR",target:"PLTR_CUSTOMERS"},{source:"PLTR",target:"PLTR_SUPPLIERS"},{source:"PLTR_COMPETITORS",target:"DDOG"},{source:"PLTR_COMPETITORS",target:"CRWD"},{source:"PLTR_COMPETITORS",target:"PANW"},{source:"PLTR_SUPPLIERS",target:"NVDA"},{source:"PLTR_SUPPLIERS",target:"AMZN"},{source:"PLTR_SUPPLIERS",target:"MSFT"},{source:"PLTR_SUPPLIERS",target:"GOOGL"},{source:"TXN",target:"TXN_COMPETITORS"},{source:"TXN",target:"TXN_CUSTOMERS"},{source:"TXN",target:"TXN_SUPPLIERS"},{source:"TXN_COMPETITORS",target:"ADI"},{source:"TXN_COMPETITORS",target:"MCHP"},{source:"TXN_COMPETITORS",target:"NXPI"},{source:"TXN_COMPETITORS",target:"MPWR"},{source:"TXN_CUSTOMERS",target:"AAPL"},{source:"TXN_CUSTOMERS",target:"TSLA"},{source:"TXN_SUPPLIERS",target:"ASML"},{source:"TXN_SUPPLIERS",target:"AMAT"},{source:"TXN_SUPPLIERS",target:"LRCX"},{source:"KLAC",target:"KLAC_COMPETITORS"},{source:"KLAC",target:"KLAC_CUSTOMERS"},{source:"KLAC",target:"KLAC_SUPPLIERS"},{source:"KLAC_COMPETITORS",target:"AMAT"},{source:"KLAC_COMPETITORS",target:"LRCX"},{source:"KLAC_COMPETITORS",target:"ASML"},{source:"KLAC_CUSTOMERS",target:"NVDA"},{source:"KLAC_CUSTOMERS",target:"AMD"},{source:"KLAC_CUSTOMERS",target:"INTC"},{source:"KLAC_CUSTOMERS",target:"MU"},{source:"KLAC_CUSTOMERS",target:"AVGO"},{source:"KLAC_CUSTOMERS",target:"QCOM"},{source:"SNDK",target:"SNDK_COMPETITORS"},{source:"SNDK",target:"SNDK_CUSTOMERS"},{source:"SNDK",target:"SNDK_SUPPLIERS"},{source:"SNDK_COMPETITORS",target:"MU"},{source:"SNDK_COMPETITORS",target:"STX"},{source:"SNDK_COMPETITORS",target:"WDC"},{source:"SNDK_CUSTOMERS",target:"NVDA"},{source:"SNDK_CUSTOMERS",target:"MSFT"},{source:"SNDK_CUSTOMERS",target:"AMZN"},{source:"SNDK_SUPPLIERS",target:"ASML"},{source:"SNDK_SUPPLIERS",target:"AMAT"},{source:"SNDK_SUPPLIERS",target:"LRCX"},{source:"MRVL",target:"MRVL_COMPETITORS"},{source:"MRVL",target:"MRVL_CUSTOMERS"},{source:"MRVL",target:"MRVL_SUPPLIERS"},{source:"MRVL_COMPETITORS",target:"AVGO"},{source:"MRVL_COMPETITORS",target:"NVDA"},{source:"MRVL_COMPETITORS",target:"QCOM"},{source:"MRVL_COMPETITORS",target:"AMD"},{source:"MRVL_CUSTOMERS",target:"AMZN"},{source:"MRVL_CUSTOMERS",target:"GOOGL"},{source:"MRVL_CUSTOMERS",target:"MSFT"},{source:"MRVL_CUSTOMERS",target:"META"},{source:"MRVL_SUPPLIERS",target:"ASML"},{source:"MRVL_SUPPLIERS",target:"AMAT"},{source:"MRVL_SUPPLIERS",target:"LRCX"},{source:"QCOM",target:"QCOM_COMPETITORS"},{source:"QCOM",target:"QCOM_CUSTOMERS"},{source:"QCOM",target:"QCOM_SUPPLIERS"},{source:"QCOM_COMPETITORS",target:"NVDA"},{source:"QCOM_COMPETITORS",target:"AMD"},{source:"QCOM_COMPETITORS",target:"INTC"},{source:"QCOM_COMPETITORS",target:"MRVL"},{source:"QCOM_COMPETITORS",target:"NXPI"},{source:"QCOM_COMPETITORS",target:"ARM"},{source:"QCOM_CUSTOMERS",target:"AAPL"},{source:"QCOM_COMPETITORS",target:"TSLA"},{source:"QCOM_SUPPLIERS",target:"ASML"},{source:"QCOM_SUPPLIERS",target:"AMAT"},{source:"QCOM_SUPPLIERS",target:"LRCX"},{source:"PANW",target:"PANW_COMPETITORS"},{source:"PANW",target:"PANW_CUSTOMERS"},{source:"PANW",target:"PANW_SUPPLIERS"},{source:"PANW_COMPETITORS",target:"CRWD"},{source:"PANW_COMPETITORS",target:"FTNT"},{source:"PANW_COMPETITORS",target:"ZS"},{source:"PANW_COMPETITORS",target:"MSFT"},{source:"PANW_COMPETITORS",target:"CSCO"},{source:"PANW_SUPPLIERS",target:"AMZN"},{source:"PANW_SUPPLIERS",target:"MSFT"},{source:"ADI",target:"ADI_COMPETITORS"},{source:"ADI",target:"ADI_CUSTOMERS"},{source:"ADI",target:"ADI_SUPPLIERS"},{source:"ADI_COMPETITORS",target:"TXN"},{source:"ADI_COMPETITORS",target:"MCHP"},{source:"ADI_COMPETITORS",target:"NXPI"},{source:"ADI_COMPETITORS",target:"MPWR"},{source:"ADI_CUSTOMERS",target:"AAPL"},{source:"ADI_CUSTOMERS",target:"TSLA"},{source:"ADI_CUSTOMERS",target:"NVDA"},{source:"ADI_SUPPLIERS",target:"ASML"},{source:"ADI_SUPPLIERS",target:"AMAT"},{source:"ADI_SUPPLIERS",target:"LRCX"},{source:"LIN",target:"LIN_COMPETITORS"},{source:"LIN",target:"LIN_CUSTOMERS"},{source:"LIN",target:"LIN_SUPPLIERS"},{source:"LIN_CUSTOMERS",target:"INTC"},{source:"LIN_CUSTOMERS",target:"AMAT"},{source:"LIN_CUSTOMERS",target:"LRCX"},{source:"LIN_CUSTOMERS",target:"ASML"},{source:"PEP",target:"PEP_COMPETITORS"},{source:"PEP",target:"PEP_CUSTOMERS"},{source:"PEP",target:"PEP_SUPPLIERS"},{source:"PEP_COMPETITORS",target:"MNST"},{source:"PEP_COMPETITORS",target:"MDLZ"},{source:"PEP_CUSTOMERS",target:"WMT"},{source:"PEP_CUSTOMERS",target:"COST"},{source:"PEP_CUSTOMERS",target:"AMZN"},{source:"STX",target:"STX_COMPETITORS"},{source:"STX",target:"STX_CUSTOMERS"},{source:"STX",target:"STX_SUPPLIERS"},{source:"STX_COMPETITORS",target:"WDC"},{source:"STX_COMPETITORS",target:"MU"},{source:"STX_COMPETITORS",target:"SNDK"},{source:"STX_CUSTOMERS",target:"AMZN"},{source:"STX_CUSTOMERS",target:"MSFT"},{source:"STX_CUSTOMERS",target:"GOOGL"},{source:"STX_SUPPLIERS",target:"AMAT"},{source:"STX_SUPPLIERS",target:"LRCX"},{source:"STX_SUPPLIERS",target:"KLAC"},{source:"WDC",target:"WDC_COMPETITORS"},{source:"WDC",target:"WDC_CUSTOMERS"},{source:"WDC",target:"WDC_SUPPLIERS"},{source:"WDC_COMPETITORS",target:"MU"},{source:"WDC_COMPETITORS",target:"STX"},{source:"WDC_COMPETITORS",target:"SNDK"},{source:"WDC_CUSTOMERS",target:"AMZN"},{source:"WDC_CUSTOMERS",target:"MSFT"},{source:"WDC_CUSTOMERS",target:"GOOGL"},{source:"WDC_SUPPLIERS",target:"AMAT"},{source:"WDC_SUPPLIERS",target:"LRCX"},{source:"WDC_SUPPLIERS",target:"KLAC"},{source:"WDC_SUPPLIERS",target:"ASML"},{source:"TMUS",target:"TMUS_COMPETITORS"},{source:"TMUS",target:"TMUS_CUSTOMERS"},{source:"TMUS",target:"TMUS_SUPPLIERS"},{source:"TMUS_COMPETITORS",target:"CSCO"},{source:"TMUS_SUPPLIERS",target:"QCOM"},{source:"TMUS_SUPPLIERS",target:"AAPL"},{source:"TMUS_SUPPLIERS",target:"NVDA"},{source:"APP",target:"APP_COMPETITORS"},{source:"APP",target:"APP_CUSTOMERS"},{source:"APP",target:"APP_SUPPLIERS"},{source:"APP_COMPETITORS",target:"GOOGL"},{source:"APP_COMPETITORS",target:"META"},{source:"APP_COMPETITORS",target:"AMZN"},{source:"APP_CUSTOMERS",target:"GOOGL"},{source:"APP_CUSTOMERS",target:"META"},{source:"APP_CUSTOMERS",target:"AMZN"},{source:"APP_SUPPLIERS",target:"AMZN"},{source:"APP_SUPPLIERS",target:"GOOGL"},{source:"APP_SUPPLIERS",target:"MSFT"},{source:"CRWD",target:"CRWD_COMPETITORS"},{source:"CRWD",target:"CRWD_CUSTOMERS"},{source:"CRWD",target:"CRWD_SUPPLIERS"},{source:"CRWD_COMPETITORS",target:"PANW"},{source:"CRWD_COMPETITORS",target:"FTNT"},{source:"CRWD_COMPETITORS",target:"ZS"},{source:"CRWD_COMPETITORS",target:"MSFT"},{source:"CRWD_COMPETITORS",target:"CSCO"},{source:"CRWD_SUPPLIERS",target:"AMZN"},{source:"CRWD_SUPPLIERS",target:"MSFT"},{source:"CRWD_SUPPLIERS",target:"GOOGL"},{source:"AMGN",target:"AMGN_COMPETITORS"},{source:"AMGN",target:"AMGN_CUSTOMERS"},{source:"AMGN",target:"AMGN_SUPPLIERS"},{source:"AMGN_COMPETITORS",target:"GILD"},{source:"AMGN_COMPETITORS",target:"VRTX"},{source:"AMGN_COMPETITORS",target:"REGN"},{source:"AMGN_COMPETITORS",target:"ALNY"},{source:"GILD",target:"GILD_COMPETITORS"},{source:"GILD",target:"GILD_CUSTOMERS"},{source:"GILD",target:"GILD_SUPPLIERS"},{source:"GILD_COMPETITORS",target:"AMGN"},{source:"GILD_COMPETITORS",target:"VRTX"},{source:"GILD_COMPETITORS",target:"REGN"},{source:"GILD_COMPETITORS",target:"ALNY"}];
+let EC={competitors:'#E05030',customers:'#1D9E75',suppliers:'#6b7280'};
+let CC={stock:'#7c6fd4',competitors:'#E05030',customers:'#1D9E75',suppliers:'#6b7280'};
+const canvas=document.getElementById('gc'),ctx=canvas.getContext('2d');
+let mode='direct',ftype='all',srch='',sel=null;
+let sentimentFilter='all';  // 'all' | 'up' | 'dn'
+let tr={x:0,y:0,k:1},drag=null,ds=null,isPan=false,panO=null;
+let nodes=[],links=[],sim=null;
+
+// ── Sentiment Mode ──────────────────────────────────────
+let sentimentMode = false;   // false = classic, true = %Chg color
+let PRICE_DATA = {};         // { NVDA: { pct: +2.1, price: 875.4, bounce: 62.5 } }
+let priceLoaded = false;
+
+async function loadPriceData() {
+  if (priceLoaded) return;
+  try {
+    const res = await fetch('../filter_universe.json');
+    if (!res.ok) return;
+    const data = await res.json();
+    data.forEach(d => {
+      const sym = d.symbol;
+      if (!sym) return;
+      const pct = d.price_change_pct ?? d.return_5d_pct ?? null;
+      const price = d.close ?? d.latest_close ?? null;
+      const bounce = d.bounce_score ?? null;
+      if (pct !== null) PRICE_DATA[sym] = { pct, price, bounce };
+    });
+    priceLoaded = true;
+    console.log(`Loaded price data: ${Object.keys(PRICE_DATA).length} stocks`);
+  } catch(e) {
+    console.warn('filter_universe.json not found:', e);
+  }
+}
+
+function getSentimentColor(sym) {
+  const d = PRICE_DATA[sym];
+  if (!d || d.pct === null) return '#3a3a4a';  // ไม่มีข้อมูล = เทาเข้ม
+  const pct = d.pct;
+  if (pct > 3)  return '#16a34a';  // เขียวเข้ม >+3%
+  if (pct > 1)  return '#22c55e';  // เขียวกลาง +1~3%
+  if (pct > 0)  return '#4ade80';  // เขียวอ่อน 0~+1%
+  if (pct > -1) return '#f87171';  // แดงอ่อน -1~0%
+  if (pct > -3) return '#ef4444';  // แดงกลาง -3~-1%
+  return '#b91c1c';                // แดงเข้ม < -3%
+}
+
+function setSentimentFilter(f) {
+  sentimentFilter = f;
+  ['all','up','dn'].forEach(x => {
+    const el = document.getElementById('sf-'+x);
+    if(el) el.classList.toggle('on', x === f);
+  });
+  draw();
+}
+function setSentimentMode(on) {
+  if(on) loadPriceData().then(()=>{sentimentMode=true;_updateSentimentUI();draw();});
+  else{sentimentMode=false;_updateSentimentUI();draw();}
+}
+function _updateSentimentUI(){
+  document.getElementById('btn-classic').classList.toggle('active', !sentimentMode);
+  document.getElementById('btn-sentiment').classList.toggle('active', sentimentMode);
+  // แสดง/ซ่อน sentiment filter bar
+  document.getElementById('sentiment-filters').style.display = sentimentMode ? 'flex' : 'none';
+  if(!sentimentMode) { sentimentFilter='all'; setSentimentFilter('all'); }
+
+  const on = sentimentMode;
+  // อัปเดต legend
+  const legend = document.getElementById('legend');
+  if (on) {
+    legend.innerHTML = `
+      <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.5px;margin-bottom:4px">%CHG วันนี้</div>
+      <div class="leg-row"><span class="leg-line" style="background:#16a34a;height:10px;border-radius:3px"></span> > +3%</div>
+      <div class="leg-row"><span class="leg-line" style="background:#22c55e;height:10px;border-radius:3px"></span> +1% ~ +3%</div>
+      <div class="leg-row"><span class="leg-line" style="background:#4ade80;height:10px;border-radius:3px"></span> 0% ~ +1%</div>
+      <div class="leg-row"><span class="leg-line" style="background:#f87171;height:10px;border-radius:3px"></span> -1% ~ 0%</div>
+      <div class="leg-row"><span class="leg-line" style="background:#ef4444;height:10px;border-radius:3px"></span> -3% ~ -1%</div>
+      <div class="leg-row"><span class="leg-line" style="background:#b91c1c;height:10px;border-radius:3px"></span> < -3%</div>
+      <div style="height:4px;border-top:1px solid var(--border);margin:4px 0"></div>
+      <div class="leg-row"><span class="leg-dot" style="background:#3a3a4a;border:1px solid #555"></span> ไม่มีข้อมูล</div>`;
+  } else {
+    legend.innerHTML = `
+      <div class="leg-row"><span class="leg-line" style="background:var(--red)"></span>Competitors</div>
+      <div class="leg-row"><span class="leg-line" style="background:var(--green)"></span>Customers</div>
+      <div class="leg-row"><span class="leg-line" style="background:var(--gray)"></span>Suppliers</div>
+      <div style="height:4px;border-top:1px solid var(--border);margin:2px 0"></div>
+      <div class="leg-row"><span class="leg-dot"></span>หุ้น (ขนาด = connections)</div>`;
+  }
+
+  // อัปเดต mode-desc
+  const desc = document.getElementById('mode-desc');
+  if (on) {
+    const total = Object.keys(PRICE_DATA).length;
+    const up   = Object.values(PRICE_DATA).filter(d => d.pct > 0).length;
+    const dn   = Object.values(PRICE_DATA).filter(d => d.pct < 0).length;
+    desc.innerHTML = `<strong style="color:#e2e0d8">🎨 Sentiment mode</strong><br>
+      สี node = %Chg วันนี้<br>
+      <span style="color:#22c55e">▲ ${up} หุ้นขึ้น</span> · <span style="color:#ef4444">▼ ${dn} หุ้นลง</span><br>
+      <span style="color:var(--muted);font-size:10px">ข้อมูล ${total} หุ้น · คลิก node ดูรายละเอียด</span>`;
+  } else {
+    desc.innerHTML = mode === 'direct'
+      ? '<strong style="color:#e2e0d8">📊 Direct mode</strong><br>เส้นเชื่อมโดยตรงระหว่างหุ้น<br>สีเส้น = ประเภทความสัมพันธ์'
+      : '<strong style="color:#e2e0d8">🔵 Cluster mode</strong><br>node กลางคือกลุ่ม เช่น NVDA_CUSTOMERS<br>สี node = ประเภทกลุ่ม';
+  }
+  draw();
+}
+function buildDirect(){nodes=STOCKS.map(n=>({...n,x:(Math.random()-.5)*500,y:(Math.random()-.5)*500}));const nm=new Map(nodes.map(n=>[n.id,n]));links=LINKS.map(l=>({source:nm.get(l.s),target:nm.get(l.t),type:l.y})).filter(l=>l.source&&l.target);}
+function buildCluster(){nodes=CNODES.map(n=>({...n,x:(Math.random()-.5)*600,y:(Math.random()-.5)*600}));const nm=new Map(nodes.map(n=>[n.id,n]));links=CLINKS.map(l=>({source:nm.get(l.source),target:nm.get(l.target),type:null})).filter(l=>l.source&&l.target);}
+function startSim(){if(sim)sim.stop();const dist=mode==='direct'?85:60,str=mode==='direct'?.35:.5,chg=mode==='direct'?-200:-160;sim=d3.forceSimulation(nodes).force('link',d3.forceLink(links).distance(dist).strength(str)).force('charge',d3.forceManyBody().strength(chg)).force('center',d3.forceCenter(0,0)).force('col',d3.forceCollide(d=>getR(d)+3)).on('tick',draw);}
+function initMode(){sel=null;srch='';document.getElementById('srch').value='';const r=canvas.getBoundingClientRect();tr={x:r.width/2,y:r.height/2,k:mode==='direct'?.88:.75};if(mode==='direct')buildDirect();else buildCluster();startSim();const desc=document.getElementById('mode-desc');desc.innerHTML=mode==='direct'?'<strong style="color:#e2e0d8">📊 Direct mode</strong><br>เส้นเชื่อมโดยตรงระหว่างหุ้น<br>สีเส้น = ประเภทความสัมพันธ์':'<strong style="color:#e2e0d8">🔵 Cluster mode</strong><br>node กลางคือกลุ่ม เช่น NVDA_CUSTOMERS<br>สี node = ประเภทกลุ่ม';setInfoDefault();draw();}
+function resize(){const r=canvas.getBoundingClientRect();canvas.width=r.width*devicePixelRatio;canvas.height=r.height*devicePixelRatio;canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.scale(devicePixelRatio,devicePixelRatio);}
+window.addEventListener('resize',()=>{resize();sim&&sim.alpha(.3).restart();});
+function getR(d){if(mode==='cluster'){if(d.type==='stock')return Math.max(7,Math.min(18,5+(d.conn||1)*.5));return Math.max(5,Math.min(11,4+(d.conn||1)*.4));}return Math.max(7,Math.min(20,6+(d.c||d.conn||1)*.35));}
+function s2w(x,y){return{x:(x-tr.x)/tr.k,y:(y-tr.y)/tr.k};}
+function vlinks(){if(mode==='cluster'||ftype==='all')return links;return links.filter(l=>l.type===ftype);}
+function draw(){
+  const r=canvas.getBoundingClientRect();
+  ctx.save();ctx.clearRect(0,0,r.width,r.height);
+  ctx.translate(tr.x,tr.y);ctx.scale(tr.k,tr.k);
+  const vl=vlinks(),connMap={};
+  if(sel)vl.forEach(l=>{const si=l.source.id,ti=l.target.id;if(si===sel)connMap[ti]=l.type||'default';if(ti===sel&&!connMap[si])connMap[si]=l.type||'default';});
+
+  // edges
+  vl.forEach(l=>{
+    const active=sel&&(l.source.id===sel||l.target.id===sel);
+    const otherNode = l.source.id===sel ? l.target : l.source;
+    const otherPd = PRICE_DATA[otherNode.id];
+
+    // ตรวจว่า edge นี้ผ่าน sentiment filter มั้ย
+    let edgeVisible = active;
+    if(active && sentimentMode && sentimentFilter !== 'all') {
+      edgeVisible = (sentimentFilter==='up' && otherPd?.pct > 0) ||
+                    (sentimentFilter==='dn' && otherPd?.pct < 0);
+    }
+
+    const deepFade = sentimentMode && sentimentFilter !== 'all' && sel;
+    ctx.beginPath();ctx.moveTo(l.source.x,l.source.y);ctx.lineTo(l.target.x,l.target.y);
+
+    if(sentimentMode){
+      const tcol=getSentimentColor(otherNode.id);
+      if(edgeVisible) {
+        ctx.strokeStyle=tcol+'cc'; ctx.lineWidth=2;
+      } else if(active) {
+        ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=.5;
+      } else {
+        ctx.strokeStyle=deepFade?'rgba(255,255,255,0.01)':tcol+'18'; ctx.lineWidth=.5;
+      }
+    } else if(mode==='direct'){
+      const col=EC[l.type]||'#888';
+      const faded2=sel&&!active;
+      ctx.strokeStyle=faded2?'rgba(255,255,255,0.03)':active?col:col+'30';
+      ctx.lineWidth=active?2:.7;
+    } else {
+      const faded2=sel&&!active;
+      ctx.strokeStyle=faded2?'rgba(255,255,255,0.04)':active?'rgba(200,190,255,.7)':'rgba(180,170,255,0.15)';
+      ctx.lineWidth=active?1.5:.6;
+    }
+    ctx.stroke();
+  });
+
+  // nodes
+  nodes.forEach(d=>{
+    const r2=getR(d),isSel=sel===d.id,isConn=sel&&connMap[d.id]!==undefined;
+    const pd=PRICE_DATA[d.id];
+
+    let faded = false;
+    if(sentimentMode && sentimentFilter !== 'all' && sel) {
+      // มี selection + sentiment filter
+      // แสดงเต็มแค่: node ที่เลือก + connected nodes ที่ตรง filter
+      const passFilter = (sentimentFilter==='up' && pd?.pct > 0) ||
+                         (sentimentFilter==='dn' && pd?.pct < 0);
+      faded = !(isSel || (isConn && passFilter));
+    } else if(sel) {
+      // มี selection อย่างเดียว (ไม่มี sentiment filter)
+      faded = !isSel && !isConn;
+    }
+
+    const sh = srch && d.id.toUpperCase().includes(srch.toUpperCase());
+    let fill;
+    if(sentimentMode) fill=isSel?'#ffffff':getSentimentColor(d.id);
+    else if(mode==='direct') fill=isSel?'#534AB7':isConn?(EC[connMap[d.id]]||'#7c6fd4'):'#7c6fd4';
+    else fill=CC[d.type]||'#7c6fd4';
+
+    if(isSel||sh){ctx.shadowColor=fill;ctx.shadowBlur=18;}
+    ctx.beginPath();ctx.arc(d.x,d.y,r2,0,Math.PI*2);
+    // faded 90% = opacity 0.05, faded ปกติ = 0.12
+    const fadedAlpha = (sentimentMode && sentimentFilter !== 'all' && sel) ? '0.04' : '0.10';
+    ctx.fillStyle=faded?`rgba(50,50,60,${fadedAlpha})`:fill;ctx.fill();
+
+    const bc=sentimentMode&&!isSel?(pd?.pct>0?'rgba(34,197,94,.55)':pd?.pct<0?'rgba(239,68,68,.55)':'rgba(100,100,120,.3)'):isSel?'#3a2f90':'rgba(255,255,255,0.12)';
+    ctx.beginPath();ctx.arc(d.x,d.y,r2,0,Math.PI*2);
+    ctx.strokeStyle=faded?'rgba(100,100,120,0.08)':bc;
+    ctx.lineWidth=isSel?2.5:sentimentMode?1.5:.4;ctx.stroke();
+    ctx.shadowBlur=0;
+
+    const fs=mode==='cluster'&&d.type!=='stock'?8:9;
+    ctx.font=`${isSel?600:400} ${fs}px sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    // faded label จางมาก
+    const a = faded
+      ? ((sentimentMode && sentimentFilter !== 'all' && sel) ? 0.04 : 0.08)
+      : (isSel||isConn||sh) ? 1 : 0.75;
+    ctx.fillStyle=isSel&&sentimentMode?'#111':`rgba(210,208,200,${a})`;
+    ctx.fillText(d.id,d.x,d.y+r2+8);
+
+    if(sentimentMode&&!faded&&pd){
+      const pctStr=(pd.pct>0?'+':'')+pd.pct.toFixed(1)+'%';
+      ctx.font='500 7px sans-serif';
+      ctx.fillStyle=pd.pct>0?'#4ade80':pd.pct<0?'#f87171':'#aaa';
+      ctx.fillText(pctStr,d.x,d.y+r2+18);
+    }
+  });
+  ctx.restore();
+}
+function updInfo(){
+  if(!sel){setInfoDefault();return;}
+  const vl=vlinks(),comp=[],cust=[],supp=[],other=[];
+  vl.forEach(l=>{const si=l.source.id,ti=l.target.id;if(si===sel||ti===sel){const o=si===sel?ti:si;if(l.type==='competitors')comp.push(o);else if(l.type==='customers')cust.push(o);else if(l.type==='suppliers')supp.push(o);else other.push(o);}});
+  const bar=document.getElementById('infobar');
+  const pd=PRICE_DATA[sel];
+  const selInfo=pd?` — $${pd.price?.toFixed(2)||'?'} <span style="color:${pd.pct>0?'#4ade80':'#f87171'}">${pd.pct>0?'+':''}${pd.pct.toFixed(2)}%</span> <span style="color:#7a7f96;font-size:9px">Score ${pd.bounce?.toFixed(1)||'-'}</span>`:'';
+  bar.innerHTML=`<strong style="color:#e2e0d8">${sel}</strong>${selInfo} `;
+  const fmt=(sym,type)=>{
+    const d2=PRICE_DATA[sym];
+    const pctStr=d2?` <span style="color:${d2.pct>0?'#4ade80':'#f87171'};font-size:9px">${d2.pct>0?'+':''}${d2.pct.toFixed(1)}%</span>`:'';
+    const cls=type==='competitors'?'tag-comp':type==='customers'?'tag-cust':'tag-supp';
+    return `<span class="tag ${cls}">${sym}${pctStr}</span>`;
+  };
+  if(comp.length)bar.innerHTML+=comp.map(x=>fmt(x,'competitors')).join('');
+  if(cust.length)bar.innerHTML+=cust.map(x=>fmt(x,'customers')).join('');
+  if(supp.length)bar.innerHTML+=supp.map(x=>fmt(x,'suppliers')).join('');
+  if(!comp.length&&!cust.length&&!supp.length)bar.innerHTML+=`<span style="color:var(--muted)">ไม่มี connection</span>`;
+}
+
+function getNode(sx,sy){const w=s2w(sx,sy);for(const d of nodes)if((d.x-w.x)**2+(d.y-w.y)**2<(getR(d)+5)**2)return d;return null;}
+canvas.addEventListener('mousedown',e=>{const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,hit=getNode(mx,my);if(hit){drag=hit;ds={x:mx,y:my};hit.fx=hit.x;hit.fy=hit.y;sim.alphaTarget(.3).restart();}else{isPan=true;panO={x:mx,y:my,ox:tr.x,oy:tr.y};}});
+canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;if(drag){const w=s2w(mx,my);drag.fx=w.x;drag.fy=w.y;}else if(isPan&&panO){tr.x=panO.ox+(mx-panO.x);tr.y=panO.oy+(my-panO.y);draw();}});
+canvas.addEventListener('mouseup',e=>{const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;if(drag){if(Math.abs(mx-ds.x)<5&&Math.abs(my-ds.y)<5){sel=sel===drag.id?null:drag.id;updInfo();draw();}drag.fx=null;drag.fy=null;drag=null;sim.alphaTarget(0);}isPan=false;panO=null;});
+canvas.addEventListener('wheel',e=>{e.preventDefault();const r=canvas.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,nk=Math.max(.15,Math.min(6,tr.k*(e.deltaY>0?.85:1.18)));tr.x=mx-(mx-tr.x)*(nk/tr.k);tr.y=my-(my-tr.y)*(nk/tr.k);tr.k=nk;draw();},{passive:false});
+function setInfoDefault(){
+  const bar = document.getElementById('infobar');
+  if(sentimentMode && sentimentFilter !== 'all') {
+    bar.innerHTML = `<span style="color:#7a7f96">👆 คลิกหุ้นที่สนใจเพื่อดูว่าหุ้นที่เชื่อมกัน</span>
+      <span style="color:${sentimentFilter==='up'?'#4ade80':'#f87171'}">${sentimentFilter==='up'?'🟢 เขียวตาม':'🔴 แดงตาม'}</span>
+      <span style="color:#7a7f96">บ้าง</span>`;
+  } else {
+    bar.textContent = 'คลิก node เพื่อดู relationships · ลากได้ · scroll zoom';
+  }
+}
+function updInfo(){if(!sel){setInfoDefault();return;}const vl=vlinks(),comp=[],cust=[],supp=[],other=[];vl.forEach(l=>{const si=l.source.id,ti=l.target.id;if(si===sel||ti===sel){const o=si===sel?ti:si;if(l.type==='competitors')comp.push(o);else if(l.type==='customers')cust.push(o);else if(l.type==='suppliers')supp.push(o);else other.push(o);}});const bar=document.getElementById('infobar');bar.innerHTML=`<strong style="color:#e2e0d8">${sel}</strong> `;if(comp.length)bar.innerHTML+=comp.map(x=>`<span class="tag tag-comp">${x}</span>`).join('');if(cust.length)bar.innerHTML+=cust.map(x=>`<span class="tag tag-cust">${x}</span>`).join('');if(supp.length)bar.innerHTML+=supp.map(x=>`<span class="tag tag-supp">${x}</span>`).join('');if(!comp.length&&!cust.length&&!supp.length&&!other.length)bar.innerHTML+=`<span style="color:var(--muted)">ไม่มี connection</span>`;}
+function setMode(m,btn){mode=m;sel=null;document.querySelectorAll('.mode-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('toolbar').style.display=m==='direct'?'flex':'none';initMode();}
+function setF(f){ftype=f;sel=null;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));document.querySelector(`.filter-btn[data-f="${f}"]`).classList.add('on');setInfoDefault();draw();}
+function onSrch(v){srch=v;sel=null;setInfoDefault();draw();}
+function doReset(){const r=canvas.getBoundingClientRect();tr={x:r.width/2,y:r.height/2,k:mode==='direct'?.88:.75};sel=null;setInfoDefault();draw();}
+function parseCSV(text){const lines=text.trim().split(/\r?\n/).filter(l=>l.trim());if(lines.length<2)throw new Error('CSV ต้องมีอย่างน้อย 2 แถว');const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));const srcIdx=headers.findIndex(h=>h==='source'),tgtIdx=headers.findIndex(h=>h==='target');if(srcIdx===-1||tgtIdx===-1)throw new Error('ไม่พบ column "Source" และ "Target"');const typeIdx=headers.findIndex(h=>['type','relationship','rel','kind'].includes(h));const rawLinks=[],connCount={};for(let i=1;i<lines.length;i++){const cols=lines[i].split(',').map(c=>c.trim().replace(/"/g,''));const src=cols[srcIdx],tgt=cols[tgtIdx];if(!src||!tgt||src===tgt)continue;const type=typeIdx!==-1?cols[typeIdx]?.toLowerCase():null;rawLinks.push({s:src,t:tgt,y:type||null});connCount[src]=(connCount[src]||0)+1;connCount[tgt]=(connCount[tgt]||0)+1;}if(!rawLinks.length)throw new Error('ไม่พบ edge ใน CSV');const allIds=new Set(rawLinks.flatMap(l=>[l.s,l.t]));const newNodes=[...allIds].map(id=>({id,c:connCount[id]||1,conn:connCount[id]||1,type:id.includes('_')?id.split('_').slice(1).join('_').toLowerCase():'stock'}));return{nodes:newNodes,links:rawLinks,count:{nodes:newNodes.length,links:rawLinks.length}};}
+function applyCustomData(parsed,filename){STOCKS.length=0;parsed.nodes.forEach(n=>STOCKS.push(n));LINKS.length=0;parsed.links.forEach(l=>LINKS.push(l));document.getElementById('subtitle').textContent=`${parsed.count.nodes} nodes · ${parsed.count.links} edges · ${filename}`;const st=document.getElementById('csv-status');st.textContent=`✓ โหลด ${filename} สำเร็จ`;st.className='ok';document.getElementById('reset-csv-btn').style.display='inline-block';sel=null;ftype='all';document.getElementById('srch').value='';srch='';initMode();}
+function resetToDefault(){document.getElementById('subtitle').textContent='62 stocks · 353 relationships';const st=document.getElementById('csv-status');st.textContent='NASDAQ 100 default';st.className='';document.getElementById('reset-csv-btn').style.display='none';sel=null;ftype='all';document.getElementById('srch').value='';srch='';initMode();}
+function loadFile(file){if(!file||!file.name.endsWith('.csv'))return;const reader=new FileReader();reader.onload=e=>{try{applyCustomData(parseCSV(e.target.result),file.name);}catch(err){const st=document.getElementById('csv-status');st.textContent='✕ '+err.message;st.className='err';}};reader.readAsText(file);}
+function onFileChange(e){loadFile(e.target.files[0]);e.target.value='';}
+function onDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over');}
+function onDragLeave(e){document.getElementById('drop-zone').classList.remove('drag-over');}
+function onDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over');loadFile(e.dataTransfer.files[0]);}
+resize();initMode();
+</script>
+</body>
+</html>

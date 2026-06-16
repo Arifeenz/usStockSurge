@@ -1,0 +1,2 @@
+strategy_name,start_date,end_date,min_bounce_score,tp_pct,sl_pct,max_hold_days,max_positions,total_trades,win_rate_pct,final_capital,roi_pct,profit_factor,max_drawdown_pct
+rule_based_bounce,2025-01-02,2026-05-13,70.0,8.0,6.0,10,1,30,36.67,91097.43,-8.9,0.722,-22.67

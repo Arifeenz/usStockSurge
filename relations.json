@@ -1,0 +1,1679 @@
+{
+  "NVDA": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "MPWR",
+        "market": "US"
+      },
+      {
+        "symbol": "LITE",
+        "market": "US"
+      },
+      {
+        "symbol": "SNDK",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      },
+      {
+        "symbol": "TSLA",
+        "market": "US"
+      },
+      {
+        "symbol": "PLTR",
+        "market": "US"
+      },
+      {
+        "symbol": "PANW",
+        "market": "US"
+      },
+      {
+        "symbol": "CRWD",
+        "market": "US"
+      },
+      {
+        "symbol": "CDNS",
+        "market": "US"
+      },
+      {
+        "symbol": "SNPS",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "MRVL",
+        "market": "US"
+      },
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      },
+      {
+        "symbol": "ARM",
+        "market": "GB"
+      },
+      {
+        "symbol": "LITE",
+        "market": "US"
+      }
+    ]
+  },
+  "AAPL": {
+    "suppliers": [
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "ADI",
+        "market": "US"
+      },
+      {
+        "symbol": "MPWR",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "NXPI",
+        "market": "US"
+      },
+      {
+        "symbol": "SWKS",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      },
+      {
+        "symbol": "TSLA",
+        "market": "US"
+      }
+    ]
+  },
+  "MSFT": {
+    "suppliers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "PANW",
+        "market": "US"
+      },
+      {
+        "symbol": "CRWD",
+        "market": "US"
+      },
+      {
+        "symbol": "DDOG",
+        "market": "US"
+      },
+      {
+        "symbol": "ZS",
+        "market": "US"
+      },
+      {
+        "symbol": "FTNT",
+        "market": "US"
+      },
+      {
+        "symbol": "ADBE",
+        "market": "US"
+      },
+      {
+        "symbol": "WDAY",
+        "market": "US"
+      },
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "ORCL",
+        "market": "US"
+      },
+      {
+        "symbol": "CRM",
+        "market": "US"
+      },
+      {
+        "symbol": "ADBE",
+        "market": "US"
+      },
+      {
+        "symbol": "PANW",
+        "market": "US"
+      },
+      {
+        "symbol": "CRWD",
+        "market": "US"
+      },
+      {
+        "symbol": "ZS",
+        "market": "US"
+      },
+      {
+        "symbol": "FTNT",
+        "market": "US"
+      },
+      {
+        "symbol": "DDOG",
+        "market": "US"
+      },
+      {
+        "symbol": "SNPS",
+        "market": "US"
+      },
+      {
+        "symbol": "CDNS",
+        "market": "US"
+      }
+    ]
+  },
+  "AMZN": {
+    "suppliers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "NFLX",
+        "market": "US"
+      },
+      {
+        "symbol": "PANW",
+        "market": "US"
+      },
+      {
+        "symbol": "CRWD",
+        "market": "US"
+      },
+      {
+        "symbol": "DDOG",
+        "market": "US"
+      },
+      {
+        "symbol": "ZS",
+        "market": "US"
+      },
+      {
+        "symbol": "SHOP",
+        "market": "US"
+      },
+      {
+        "symbol": "MELI",
+        "market": "US"
+      },
+      {
+        "symbol": "PLTR",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "COST",
+        "market": "US"
+      },
+      {
+        "symbol": "WMT",
+        "market": "US"
+      },
+      {
+        "symbol": "SHOP",
+        "market": "US"
+      },
+      {
+        "symbol": "MELI",
+        "market": "US"
+      },
+      {
+        "symbol": "PDD",
+        "market": "US"
+      },
+      {
+        "symbol": "NFLX",
+        "market": "US"
+      }
+    ]
+  },
+  "AVGO": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "MRVL",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      }
+    ]
+  },
+  "GOOGL": {
+    "suppliers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      },
+      {
+        "symbol": "NFLX",
+        "market": "US"
+      },
+      {
+        "symbol": "BKNG",
+        "market": "US"
+      },
+      {
+        "symbol": "ABNB",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      },
+      {
+        "symbol": "NFLX",
+        "market": "US"
+      },
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      }
+    ]
+  },
+  "TSLA": {
+    "suppliers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "TXN",
+        "market": "US"
+      },
+      {
+        "symbol": "ADI",
+        "market": "US"
+      },
+      {
+        "symbol": "NXPI",
+        "market": "US"
+      },
+      {
+        "symbol": "MPWR",
+        "market": "US"
+      }
+    ],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      }
+    ]
+  },
+  "META": {
+    "suppliers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      }
+    ],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "NFLX",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      }
+    ]
+  },
+  "MU": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "SNDK",
+        "market": "US"
+      },
+      {
+        "symbol": "STX",
+        "market": "US"
+      },
+      {
+        "symbol": "WDC",
+        "market": "US"
+      }
+    ]
+  },
+  "WMT": {
+    "suppliers": [],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "COST",
+        "market": "US"
+      },
+      {
+        "symbol": "PDD",
+        "market": "US"
+      }
+    ]
+  },
+  "AMD": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "MRVL",
+        "market": "US"
+      },
+      {
+        "symbol": "ARM",
+        "market": "GB"
+      }
+    ]
+  },
+  "ASML": {
+    "suppliers": [],
+    "customers": [
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      }
+    ]
+  },
+  "INTC": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "ARM",
+        "market": "GB"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      }
+    ]
+  },
+  "CSCO": {
+    "suppliers": [
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "MRVL",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "MRVL",
+        "market": "US"
+      },
+      {
+        "symbol": "PANW",
+        "market": "US"
+      },
+      {
+        "symbol": "FTNT",
+        "market": "US"
+      },
+      {
+        "symbol": "CRWD",
+        "market": "US"
+      },
+      {
+        "symbol": "ZS",
+        "market": "US"
+      }
+    ]
+  },
+  "ARM": {
+    "suppliers": [],
+    "customers": [
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "MRVL",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      }
+    ]
+  },
+  "COST": {
+    "suppliers": [],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "WMT",
+        "market": "US"
+      },
+      {
+        "symbol": "PDD",
+        "market": "US"
+      }
+    ]
+  },
+  "LRCX": {
+    "suppliers": [],
+    "customers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      },
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      }
+    ]
+  },
+  "AMAT": {
+    "suppliers": [],
+    "customers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      },
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      }
+    ]
+  },
+  "NFLX": {
+    "suppliers": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      }
+    ],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "CMCSA",
+        "market": "US"
+      },
+      {
+        "symbol": "WBD",
+        "market": "US"
+      }
+    ]
+  },
+  "PLTR": {
+    "suppliers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      }
+    ],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "DDOG",
+        "market": "US"
+      },
+      {
+        "symbol": "CRWD",
+        "market": "US"
+      },
+      {
+        "symbol": "PANW",
+        "market": "US"
+      }
+    ]
+  },
+  "TXN": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      },
+      {
+        "symbol": "TSLA",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "ADI",
+        "market": "US"
+      },
+      {
+        "symbol": "MCHP",
+        "market": "US"
+      },
+      {
+        "symbol": "NXPI",
+        "market": "EU"
+      },
+      {
+        "symbol": "MPWR",
+        "market": "US"
+      }
+    ]
+  },
+  "KLAC": {
+    "suppliers": [],
+    "customers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      }
+    ]
+  },
+  "SNDK": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "STX",
+        "market": "US"
+      },
+      {
+        "symbol": "WDC",
+        "market": "US"
+      }
+    ]
+  },
+  "MRVL": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "AVGO",
+        "market": "US"
+      },
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      }
+    ]
+  },
+  "QCOM": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      },
+      {
+        "symbol": "AMD",
+        "market": "US"
+      },
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "MRVL",
+        "market": "US"
+      },
+      {
+        "symbol": "NXPI",
+        "market": "EU"
+      },
+      {
+        "symbol": "ARM",
+        "market": "GB"
+      },
+      {
+        "symbol": "TSLA",
+        "market": "US"
+      }
+    ]
+  },
+  "PANW": {
+    "suppliers": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      }
+    ],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "CRWD",
+        "market": "US"
+      },
+      {
+        "symbol": "FTNT",
+        "market": "US"
+      },
+      {
+        "symbol": "ZS",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      }
+    ]
+  },
+  "ADI": {
+    "suppliers": [
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      },
+      {
+        "symbol": "TSLA",
+        "market": "US"
+      },
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "TXN",
+        "market": "US"
+      },
+      {
+        "symbol": "MCHP",
+        "market": "US"
+      },
+      {
+        "symbol": "NXPI",
+        "market": "EU"
+      },
+      {
+        "symbol": "MPWR",
+        "market": "US"
+      }
+    ]
+  },
+  "LIN": {
+    "suppliers": [],
+    "customers": [
+      {
+        "symbol": "INTC",
+        "market": "US"
+      },
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      }
+    ],
+    "competitors": []
+  },
+  "PEP": {
+    "suppliers": [],
+    "customers": [
+      {
+        "symbol": "WMT",
+        "market": "US"
+      },
+      {
+        "symbol": "COST",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "MNST",
+        "market": "US"
+      },
+      {
+        "symbol": "MDLZ",
+        "market": "US"
+      }
+    ]
+  },
+  "STX": {
+    "suppliers": [
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "WDC",
+        "market": "US"
+      },
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "SNDK",
+        "market": "US"
+      }
+    ]
+  },
+  "WDC": {
+    "suppliers": [
+      {
+        "symbol": "AMAT",
+        "market": "US"
+      },
+      {
+        "symbol": "LRCX",
+        "market": "US"
+      },
+      {
+        "symbol": "KLAC",
+        "market": "US"
+      },
+      {
+        "symbol": "ASML",
+        "market": "EU"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "MU",
+        "market": "US"
+      },
+      {
+        "symbol": "STX",
+        "market": "US"
+      },
+      {
+        "symbol": "SNDK",
+        "market": "US"
+      }
+    ]
+  },
+  "TMUS": {
+    "suppliers": [
+      {
+        "symbol": "QCOM",
+        "market": "US"
+      },
+      {
+        "symbol": "AAPL",
+        "market": "US"
+      },
+      {
+        "symbol": "NVDA",
+        "market": "US"
+      }
+    ],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      }
+    ]
+  },
+  "APP": {
+    "suppliers": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      }
+    ],
+    "customers": [
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      }
+    ],
+    "competitors": [
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      },
+      {
+        "symbol": "META",
+        "market": "US"
+      },
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      }
+    ]
+  },
+  "CRWD": {
+    "suppliers": [
+      {
+        "symbol": "AMZN",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "GOOGL",
+        "market": "US"
+      }
+    ],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "PANW",
+        "market": "US"
+      },
+      {
+        "symbol": "FTNT",
+        "market": "US"
+      },
+      {
+        "symbol": "ZS",
+        "market": "US"
+      },
+      {
+        "symbol": "MSFT",
+        "market": "US"
+      },
+      {
+        "symbol": "CSCO",
+        "market": "US"
+      }
+    ]
+  },
+  "AMGN": {
+    "suppliers": [],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "GILD",
+        "market": "US"
+      },
+      {
+        "symbol": "VRTX",
+        "market": "US"
+      },
+      {
+        "symbol": "REGN",
+        "market": "US"
+      },
+      {
+        "symbol": "ALNY",
+        "market": "US"
+      }
+    ]
+  },
+  "GILD": {
+    "suppliers": [],
+    "customers": [],
+    "competitors": [
+      {
+        "symbol": "AMGN",
+        "market": "US"
+      },
+      {
+        "symbol": "VRTX",
+        "market": "US"
+      },
+      {
+        "symbol": "REGN",
+        "market": "US"
+      },
+      {
+        "symbol": "ALNY",
+        "market": "US"
+      }
+    ]
+  }
+}
