@@ -668,6 +668,30 @@ td:first-child{text-align:left}
           </table>
           </div>
         </div>
+
+        <!-- ══ SCORE VALIDATION ══ -->
+        <div class="tp" id="scoreValidationCard" style="display:none">
+          <div class="tph">
+            <span class="tpt">📊 Score Validation</span>
+            <span class="tpb" id="svBadge">Does Bounce Score ≥ 75 actually bounce?</span>
+          </div>
+          <div style="padding:18px">
+            <div style="overflow-x:auto;margin-bottom:18px">
+              <table class="tt">
+                <thead><tr>
+                  <th style="text-align:left">Score Bucket</th>
+                  <th>Signals</th><th>Win Rate</th><th>Avg Return</th>
+                  <th>Median Return</th><th>Std Dev</th>
+                </tr></thead>
+                <tbody id="svTableBody"></tbody>
+              </table>
+            </div>
+            <div style="margin-bottom:18px">
+              <svg id="svChart" viewBox="0 0 900 260" preserveAspectRatio="none" style="width:100%;height:260px;display:block"></svg>
+            </div>
+            <div id="svVerdict" style="padding:14px 16px;border-radius:10px;font-size:13px;line-height:1.6"></div>
+          </div>
+        </div>
       </div>
       <div class="btp">
         <div class="btt">Backtest Summary</div>
@@ -752,10 +776,10 @@ td:first-child{text-align:left}
       <table>
         <thead><tr>
           <th>Symbol</th>
-          <th>Company</th>
+          <th style="text-align:left">Company</th>
           <th>EPS Latest</th>
           <th>YoY Chg %</th>
-          <th>Trend</th>
+          <th style="text-align:right">Trend</th>
           <th>Period</th>
           <th>Report Date</th>
         </tr></thead>
@@ -888,6 +912,7 @@ function onSymSearch(val) {
 let BT_TRADES = [];
 let BT_EQUITY = [];
 let BT_SUMMARY = {};
+let SCORE_VALIDATION = [];
 let sortKey = 'close', sortDir = -1;
 let epsPage = 1;
 const EPS_PAGE_SIZE = 20;
@@ -1346,6 +1371,102 @@ function renderBacktest() {
     });
   }
   if (BT_EQUITY.length) drawEquity(BT_EQUITY);
+  if (SCORE_VALIDATION.length) renderScoreValidation();
+}
+
+// ═══════════════════════════════════════════
+//  SCORE VALIDATION — Bounce Score reliability check
+// ═══════════════════════════════════════════
+function renderScoreValidation() {
+  const card = document.getElementById('scoreValidationCard');
+  if (!SCORE_VALIDATION.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  // ── ตาราง ──
+  const tbody = document.getElementById('svTableBody');
+  tbody.innerHTML = SCORE_VALIDATION.map(r => {
+    const wrTone = r.win_rate_pct >= 65 ? 'up' : r.win_rate_pct >= 55 ? 'am' : 'dn';
+    const retTone = r.avg_fwd_return_pct >= 5 ? 'up' : r.avg_fwd_return_pct >= 0 ? 'am' : 'dn';
+    return `<tr>
+      <td style="text-align:left;font-weight:700">${r.score_bucket}</td>
+      <td class="num">${Number(r.n_signals).toLocaleString()}</td>
+      <td class="num ${wrTone}">${fNum(r.win_rate_pct,1)}%</td>
+      <td class="num ${retTone}">${r.avg_fwd_return_pct>=0?'+':''}${fNum(r.avg_fwd_return_pct,2)}%</td>
+      <td class="num">${r.median_fwd_return_pct>=0?'+':''}${fNum(r.median_fwd_return_pct,2)}%</td>
+      <td class="num" style="color:var(--ink-3)">${fNum(r.std_fwd_return_pct,1)}%</td>
+    </tr>`;
+  }).join('');
+
+  // ── กราฟแท่งคู่: Win Rate vs Avg Return ──
+  drawScoreValidationChart(SCORE_VALIDATION);
+
+  // ── ข้อสรุปอัตโนมัติ ──
+  const sorted = [...SCORE_VALIDATION];
+  const lowest  = sorted[0];
+  const highest = sorted[sorted.length - 1];
+  const wrRange = Math.max(...sorted.map(r=>r.win_rate_pct)) - Math.min(...sorted.map(r=>r.win_rate_pct));
+  const retDrops = highest.avg_fwd_return_pct < lowest.avg_fwd_return_pct;
+
+  const verdictEl = document.getElementById('svVerdict');
+  if (retDrops && wrRange < 5) {
+    verdictEl.style.background = 'var(--amber-lt)';
+    verdictEl.style.border = '1px solid #fde68a';
+    verdictEl.innerHTML = `⚠️ <strong>Win Rate is similar across all score buckets (${fNum(Math.min(...sorted.map(r=>r.win_rate_pct)),1)}%–${fNum(Math.max(...sorted.map(r=>r.win_rate_pct)),1)}%), but Average Return drops as score increases (${lowest.avg_fwd_return_pct>=0?'+':''}${fNum(lowest.avg_fwd_return_pct,2)}% at ${lowest.score_bucket} → ${highest.avg_fwd_return_pct>=0?'+':''}${fNum(highest.avg_fwd_return_pct,2)}% at ${highest.score_bucket}).</strong><br>
+      A higher Bounce Score does not mean a bigger bounce — it mainly reflects "safer" conditions (RSI near 40–70, close to EMA50) rather than stronger momentum. Consider the score as a risk filter, not a return predictor.`;
+  } else if (!retDrops && wrRange < 5) {
+    verdictEl.style.background = 'var(--green-lt)';
+    verdictEl.style.border = '1px solid var(--green-bd)';
+    verdictEl.innerHTML = `✅ <strong>Higher Bounce Score correlates with higher average return</strong> (${lowest.score_bucket}: ${lowest.avg_fwd_return_pct>=0?'+':''}${fNum(lowest.avg_fwd_return_pct,2)}% → ${highest.score_bucket}: ${highest.avg_fwd_return_pct>=0?'+':''}${fNum(highest.avg_fwd_return_pct,2)}%). The current formula appears predictive of stronger bounces.`;
+  } else {
+    verdictEl.style.background = 'var(--bg-2)';
+    verdictEl.style.border = '1px solid var(--border)';
+    verdictEl.innerHTML = `ℹ️ Win Rate varies meaningfully across score buckets (range ${fNum(wrRange,1)}pp). Review the table above for the full picture before drawing conclusions.`;
+  }
+}
+
+function drawScoreValidationChart(data) {
+  const W = 900, H = 260;
+  const padL = 50, padR = 50, padT = 20, padB = 40;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const n = data.length;
+  const barGroupW = chartW / n;
+  const barW = barGroupW * 0.32;
+
+  const maxWR  = Math.max(...data.map(d => d.win_rate_pct), 10) * 1.15;
+  const maxRet = Math.max(...data.map(d => Math.abs(d.avg_fwd_return_pct)), 1) * 1.3;
+
+  const syWR  = v => padT + chartH - (v / maxWR) * chartH;
+  const syRet = v => padT + chartH/2 - (v / maxRet) * (chartH/2);
+
+  let svg = `<defs></defs>`;
+  svg += `<line x1="${padL}" y1="${padT+chartH/2}" x2="${W-padR}" y2="${padT+chartH/2}" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,3"/>`;
+  svg += `<line x1="${padL}" y1="${padT+chartH}" x2="${W-padR}" y2="${padT+chartH}" stroke="var(--border)" stroke-width="1"/>`;
+
+  data.forEach((d, i) => {
+    const cx = padL + barGroupW * i + barGroupW/2;
+    const wrH = chartH - (syWR(d.win_rate_pct) - padT);
+    const wrY = syWR(d.win_rate_pct);
+    svg += `<rect x="${cx-barW-2}" y="${wrY}" width="${barW}" height="${wrH}" fill="var(--accent)" rx="2"/>`;
+    svg += `<text x="${cx-barW/2-2}" y="${wrY-6}" text-anchor="middle" font-size="10" fill="var(--accent)" font-weight="600">${fNum(d.win_rate_pct,0)}%</text>`;
+
+    const retVal = d.avg_fwd_return_pct;
+    const retCol = retVal >= 0 ? 'var(--green)' : 'var(--red)';
+    const retY = retVal >= 0 ? syRet(retVal) : padT+chartH/2;
+    const retH = Math.abs(syRet(retVal) - (padT+chartH/2));
+    svg += `<rect x="${cx+2}" y="${retY}" width="${barW}" height="${Math.max(retH,1)}" fill="${retCol}" rx="2"/>`;
+    const labelY = retVal >= 0 ? retY - 6 : retY + retH + 14;
+    svg += `<text x="${cx+barW/2+2}" y="${labelY}" text-anchor="middle" font-size="10" fill="${retCol}" font-weight="600">${retVal>=0?'+':''}${fNum(retVal,1)}%</text>`;
+
+    svg += `<text x="${cx}" y="${padT+chartH+18}" text-anchor="middle" font-size="11" fill="var(--ink-2)" font-weight="600">${d.score_bucket}</text>`;
+  });
+
+  // legend
+  svg += `<rect x="${padL}" y="4" width="10" height="10" fill="var(--accent)" rx="2"/>`;
+  svg += `<text x="${padL+14}" y="13" font-size="10" fill="var(--ink-2)">Win Rate</text>`;
+  svg += `<rect x="${padL+90}" y="4" width="10" height="10" fill="var(--green)" rx="2"/>`;
+  svg += `<text x="${padL+104}" y="13" font-size="10" fill="var(--ink-2)">Avg Return</text>`;
+
+  document.getElementById('svChart').innerHTML = svg;
 }
 
 function drawEquity(eq) {
@@ -3255,13 +3376,14 @@ async function loadData(){
       return null;
     };
 
-    const [sumData, trData, eqData, epsData] = await Promise.all([
+    const [sumData, trData, eqData, epsData, svData] = await Promise.all([
       fetchAuto('backtest_summary.json',      'backtest_summary.csv'),
       fetchAuto('backtest_trades.json',       'backtest_trades.csv'),
       fetchAuto('backtest_equity_curve.json', 'backtest_equity_curve.csv'),
       Object.keys(EPS_LIVE).length === 0
         ? fetchAuto('eps_latest.json', 'eps_latest.csv')
         : Promise.resolve(null),
+      fetchAuto('forward_return_by_score_bucket.json', 'forward_return_by_score_bucket.csv'),
     ]);
 
     if (sumData) {
@@ -3282,6 +3404,13 @@ async function loadData(){
     if (eqData) {
       // equity curve CSV: columns = date, capital
       BT_EQUITY = eqData.map(r => ({ date: r.date, capital: parseFloat(r.capital) || 0 }));
+    }
+    if (svData) {
+      SCORE_VALIDATION = svData.map(r => {
+        ['n_signals','win_rate_pct','avg_fwd_return_pct','median_fwd_return_pct','std_fwd_return_pct']
+          .forEach(f => { if (r[f] !== undefined) r[f] = parseFloat(r[f]) || 0; });
+        return r;
+      });
     }
     if (epsData) {
       epsData.forEach(e => {
