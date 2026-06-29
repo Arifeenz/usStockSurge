@@ -333,9 +333,12 @@ def analyze_forward_returns_by_score(df: pd.DataFrame) -> pd.DataFrame:
     result = sig.groupby("score_bucket", observed=True).agg(
         n_signals=("fwd_return_pct", "count"),
         win_rate_pct=("fwd_return_pct", lambda x: (x > 0).mean() * 100),
+        loss_rate_pct=("fwd_return_pct", lambda x: (x < 0).mean() * 100),
         avg_fwd_return_pct=("fwd_return_pct", "mean"),
         median_fwd_return_pct=("fwd_return_pct", "median"),
         std_fwd_return_pct=("fwd_return_pct", "std"),
+        max_drawdown_pct=("fwd_return_pct", "min"),       # การตกหนักสุดที่เคยเจอใน bucket นี้
+        worst_5pct_avg_pct=("fwd_return_pct", lambda x: x.nsmallest(max(1, int(len(x)*0.05))).mean()),  # เฉลี่ย 5% ที่แย่ที่สุด
     ).round(2).reset_index()
 
     print(f"\n   Forward return หลังสัญญาณ {HORIZON} สัปดาห์ แยกตาม Bounce Score bucket:")

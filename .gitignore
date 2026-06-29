@@ -8,5 +8,10 @@ filter_universe_backup_*.json
 *_old.py
 *_khet.py
 
+# large raw data files (too big for GitHub)
+training_data_tv_FULL_FETCH_Week.csv
+training_data_tv_FULL_FETCH_Day.csv
+data/
+
 # watchlist now uses localStorage, not file
 watchlist.json
